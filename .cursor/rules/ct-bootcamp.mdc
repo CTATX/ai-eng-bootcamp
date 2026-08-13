@@ -1,0 +1,28 @@
+---
+description: CT bootcamp defaults — invoke TeamOS Bootcamp playbook for run/debug help
+alwaysApply: true
+---
+
+# CT Bootcamp Operating Context
+
+Default: **FACT → CONTROL POINT → ACTION**.
+
+## Bootcamp runbook (load on demand)
+
+When CT says **`Use TeamOS Bootcamp for [topic]`** or asks to restart server, fix connection refused, explain client/server, or debug this repo:
+
+→ Read **`docs/ai-eng-bootcamp-playbook.md`** (use TOC; load only relevant sections).
+
+Agent stub: **`.claude/agents/ai-eng-bootcamp-agent.md`**
+
+Do not re-teach fundamentals if the playbook already covers them.
+
+## Token discipline
+
+- Index in `CLAUDE.md`; load TeamOS v2.0 / full playbook only when invoked.
+- TeamOS agents: `Use TeamOS [Agent] for [topic]` → GitHub `CTATX/my-project/.claude/agents/`
+
+## Secrets
+
+`OPENAI_API_KEY` in `.env` only. Never commit or paste in chat.
+
