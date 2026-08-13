@@ -185,7 +185,7 @@ source .venv/bin/activate
 | **D** | `curl` test `/ask` | ✅ |
 | **E** | Streamlit client → API | ✅ |
 | **Tie-back** | `POST /estimate` + first app calls API | ✅ |
-| **Next** | Docker + deploy to public URL | Syllabus |
+| **Next** | Docker + deploy to public URL | See [deploy-render.md](deploy-render.md) |
 
 ---
 

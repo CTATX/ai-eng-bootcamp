@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.git/
+.cursor/
+.agents/
+.claude/
+.streamlit/
+pages/
+app.py
+ask_client.py
+start.sh
+docs/
+*.md
+!README.md

@@ -9,6 +9,18 @@ from server.schemas import AskRequest, AskResponse, EstimateRequest, EstimateRes
 app = FastAPI(title="AI Eng Bootcamp API")
 
 
+@app.get("/")
+def root():
+    """Landing hint for deployed URL."""
+    return {
+        "service": "AI Eng Bootcamp API",
+        "health": "/health",
+        "docs": "/docs",
+        "estimate": "POST /estimate",
+        "ask": "POST /ask",
+    }
+
+
 @app.get("/health")
 def health():
     """Heartbeat check. No OpenAI, no logic — just 'am I running?'"""
