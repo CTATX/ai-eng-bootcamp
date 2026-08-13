@@ -72,6 +72,7 @@ Browser / curl
 | `server/estimate_service.py` | Glue for `/estimate` |
 | `server/openai_client.py` | Glue for `/ask` → OpenAI |
 | `cost_engine.py` | Cost math + `models.json` catalog |
+| `start.sh` | One-command boot: API + Streamlit |
 | `.env` | `OPENAI_API_KEY` (server only, gitignored) |
 | `CLAUDE.md` | Project index for agents |
 | `.claude/agents/ai-eng-bootcamp-agent.md` | TeamOS agent stub |
@@ -91,7 +92,18 @@ cp .env.example .env
 # Edit .env — set OPENAI_API_KEY=sk-proj-...
 ```
 
-### Every session — Terminal 1 (server)
+### Every session — one command (recommended)
+
+```bash
+cd /Users/ctansted/ai-eng-bootcamp
+./start.sh
+```
+
+Starts the API server (background) + Streamlit (foreground). **Ctrl+C** stops both.
+
+### Every session — two terminals (manual)
+
+**Terminal 1 — server:**
 
 ```bash
 cd /Users/ctansted/ai-eng-bootcamp
@@ -101,7 +113,7 @@ uvicorn server.main:app --reload
 
 Leave open. Expect: `Uvicorn running on http://127.0.0.1:8000`
 
-### Every session — Terminal 2 (client)
+**Terminal 2 — client:**
 
 ```bash
 cd /Users/ctansted/ai-eng-bootcamp
@@ -109,7 +121,7 @@ source .venv/bin/activate
 streamlit run app.py
 ```
 
-Use sidebar: **AI Cost Estimator** | **Bootcamp Q&A**
+Use sidebar: **Cost Estimator** | **Bootcamp Q&A**
 
 ### Verify without browser
 

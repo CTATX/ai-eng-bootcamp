@@ -25,7 +25,12 @@ cp .env.example .env
 
 ## Run (two terminals)
 
-**Terminal 1 — server:**
+**Easy — one command:**
+```bash
+./start.sh
+```
+
+**Manual — Terminal 1 (server):**
 ```bash
 uvicorn server.main:app --reload
 ```

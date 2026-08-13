@@ -50,4 +50,12 @@ Project index entry: [my-project/projects/ai-eng-bootcamp](https://github.com/CT
 | Streamlit → API (both pages) | Done |
 | Docker + deploy | Next (syllabus) |
 
-Quick start → playbook [§4 Runbook](docs/ai-eng-bootcamp-playbook.md#4-runbook--start-everything)
+Use sidebar: **Cost Estimator** | **Bootcamp Q&A**
+
+### Every session — one command (recommended)
+
+```bash
+./start.sh
+```
+
+Starts API + Streamlit. **Ctrl+C** stops both. See playbook §4.
