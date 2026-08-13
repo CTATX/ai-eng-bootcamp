@@ -26,7 +26,9 @@ Do **not** preload full TeamOS v2.0 or this playbook every session. Load playboo
 
 Agent stubs (GitHub): [CTATX/my-project/.claude/agents/](https://github.com/CTATX/my-project/tree/main/.claude/agents/)
 
-Bootcamp agent (local): `.claude/agents/ai-eng-bootcamp-agent.md`
+Bootcamp agent: [.claude/agents/ai-eng-bootcamp-agent.md](.claude/agents/ai-eng-bootcamp-agent.md) · also in [my-project](https://github.com/CTATX/my-project/blob/main/.claude/agents/ai-eng-bootcamp-agent.md)
+
+Project index entry: [my-project/projects/ai-eng-bootcamp](https://github.com/CTATX/my-project/tree/main/projects/ai-eng-bootcamp)
 
 **TeamOS v2.0 (full — rare):** [my-project/teamOS/v2](https://github.com/CTATX/my-project/tree/main/teamOS/v2)
 
