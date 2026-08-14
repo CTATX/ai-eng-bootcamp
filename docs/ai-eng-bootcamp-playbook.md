@@ -79,6 +79,7 @@ Browser / curl
 | `.claude/agents/ai-eng-bootcamp-agent.md` | TeamOS agent stub |
 | `docs/shop-intelligence-plan.md` | Licensed ShopMonkey shop-intel phases P0–P7 |
 | `docs/shop-intelligence-jtbd.md` | Running JTBD and requirements (rough cut) |
+| `docs/experiences.md` | Published GitHub paths and screenshots for each app |
 | `docs/shop-intelligence-briefing.schema.json` | Chat briefing contract (FACT / INFERRED / UNKNOWN) |
 | `pages/3_Shop_Intelligence.py` | Synthetic Porsche warehouse screens |
 

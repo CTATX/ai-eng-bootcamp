@@ -53,7 +53,8 @@ Project index entry: [my-project/projects/ai-eng-bootcamp](https://github.com/CT
 
 Use sidebar: **Cost Estimator** | **Bootcamp Q&A** | **Shop intelligence**
 
-JTBD / requirements (running, rough cut): `docs/shop-intelligence-jtbd.md`
+JTBD / requirements (running, rough cut): `docs/shop-intelligence-jtbd.md`  
+Published paths + screenshots: `docs/experiences.md`
 
 ### Every session — one command (recommended)
 

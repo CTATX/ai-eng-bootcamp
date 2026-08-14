@@ -142,3 +142,4 @@ Chat window and agents are **specified**, not built.
 | Date | Change |
 |------|--------|
 | 2026-08-14 | Created from CT messages (legal, product vision, plan-first, synthetic P1, running doc). |
+| 2026-08-14 | Posted actual GitHub paths + screenshots for all three app experiences: [docs/experiences.md](experiences.md). |

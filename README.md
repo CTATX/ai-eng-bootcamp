@@ -1,6 +1,20 @@
 # AI Eng Bootcamp
 
-TAI Labs Week 1 build: **FastAPI server** + **Streamlit client** — cost estimation and Q&A over HTTP.
+TAI Labs Week 1 build: **FastAPI server** + **Streamlit client** — cost estimation, Q&A, and a synthetic Porsche shop-intelligence prototype.
+
+## Experiences (open these on GitHub)
+
+**Full path list + screenshots:** [docs/experiences.md](https://github.com/CTATX/ai-eng-bootcamp/blob/cursor/shop-intelligence-plan-11ee/docs/experiences.md)
+
+| Experience | Screenshot |
+|------------|------------|
+| Cost Estimator | [image](https://github.com/CTATX/ai-eng-bootcamp/blob/cursor/shop-intelligence-plan-11ee/docs/examples/cost-estimator.png) |
+| Bootcamp Q&A | [image](https://github.com/CTATX/ai-eng-bootcamp/blob/cursor/shop-intelligence-plan-11ee/docs/examples/bootcamp-qa.png) |
+| Shop intelligence — Trends | [image](https://github.com/CTATX/ai-eng-bootcamp/blob/cursor/shop-intelligence-plan-11ee/docs/examples/shop-intel-trends.png) |
+| Shop intelligence — Product list | [image](https://github.com/CTATX/ai-eng-bootcamp/blob/cursor/shop-intelligence-plan-11ee/docs/examples/shop-intel-parts.png) |
+| Shop intelligence — Job packet holes | [image](https://github.com/CTATX/ai-eng-bootcamp/blob/cursor/shop-intelligence-plan-11ee/docs/examples/shop-intel-packets.png) |
+
+PR: https://github.com/CTATX/ai-eng-bootcamp/pull/2
 
 ## What this is
 

@@ -1,11 +1,13 @@
-# Visual examples (P1)
+# Visual examples
 
-Captured from the running Streamlit app at `/Shop_Intelligence`.
+Published index with GitHub URLs: [docs/experiences.md](../experiences.md)
 
-| File | Tab |
-|------|-----|
-| `shop-intel-trends.png` | Trends — ticket by year, why it came in |
-| `shop-intel-parts.png` | Product list — named vendors, `SYN-` SKUs |
-| `shop-intel-packets.png` | Job packet holes — UNKNOWN media slots |
+| File | Experience |
+|------|------------|
+| `cost-estimator.png` | Cost Estimator |
+| `bootcamp-qa.png` | Bootcamp Q&A |
+| `shop-intel-trends.png` | Shop intelligence — Trends |
+| `shop-intel-parts.png` | Shop intelligence — Product list |
+| `shop-intel-packets.png` | Shop intelligence — Job packet holes |
 
-Synthetic Porsche data. Not ShopMonkey. Not live vendor inventory.
+Shop screens use synthetic Porsche data. Not ShopMonkey. Not live vendor inventory.
