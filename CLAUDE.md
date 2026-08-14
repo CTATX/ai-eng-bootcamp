@@ -47,10 +47,12 @@ Project index entry: [my-project/projects/ai-eng-bootcamp](https://github.com/CT
 | Piece | Status |
 |-------|--------|
 | `GET /health`, `POST /ask`, `POST /estimate` | Done |
-| Streamlit → API (both pages) | Done |
-| Docker + deploy | Next (syllabus) |
+| AI FinOps telemetry + KPI APIs | MVP done |
+| ShopMonkey REST v3 integration | MVP done — integration only, not a reskin |
+| Streamlit → API (Cost, Q&A, AI FinOps, ShopMonkey) | Done |
+| Render config | Done; durable FinOps database remains |
 
-Use sidebar: **Cost Estimator** | **Bootcamp Q&A**
+Use sidebar: **Cost Estimator** | **Bootcamp Q&A** | **AI FinOps** | **ShopMonkey**
 
 ### Every session — one command (recommended)
 

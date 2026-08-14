@@ -11,5 +11,13 @@ services:
     envVars:
       - key: OPENAI_API_KEY
         sync: false
+      - key: SHOPMONKEY_API_KEY
+        sync: false
+      - key: AI_FINOPS_DB_PATH
+        value: /tmp/finops.sqlite3
+      - key: AI_DAILY_BUDGET_USD
+        value: "5.00"
+      - key: AI_HARD_STOP_ENABLED
+        value: "false"
       - key: PYTHON_VERSION
         value: "3.12.0"

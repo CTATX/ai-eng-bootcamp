@@ -20,6 +20,8 @@ TAI Labs Week 1 learning artifact. Load this doc on demand — do not paste into
 10. [Concepts glossary](#10-concepts-glossary)
 11. [Tie to ai-build-crew](#11-tie-to-ai-build-crew)
 12. [Demo script](#12-demo-script)
+13. [AI FinOps MVP](#13-ai-finops-mvp)
+14. [ShopMonkey integration](#14-shopmonkey-integration)
 
 ---
 
@@ -66,14 +68,16 @@ Browser / curl
 |------|------|
 | `app.py` | Cost Estimator UI → calls `/estimate` |
 | `pages/2_Bootcamp_QA.py` | Q&A UI → calls `/ask` |
+| `pages/4_ShopMonkey.py` | Shop integration UI → `/shopmonkey/*` |
 | `api_client.py` | Shared `server_is_up()` + `API_BASE` |
-| `server/main.py` | Routes: `/health`, `/estimate`, `/ask` |
+| `server/main.py` | Routes: `/health`, `/estimate`, `/ask`, `/shopmonkey/*` |
+| `server/shopmonkey_client.py` | Official ShopMonkey REST v3 client |
 | `server/schemas.py` | JSON contracts (request/response shapes) |
 | `server/estimate_service.py` | Glue for `/estimate` |
 | `server/openai_client.py` | Glue for `/ask` → OpenAI |
 | `cost_engine.py` | Cost math + `models.json` catalog |
 | `start.sh` | One-command boot: API + Streamlit |
-| `.env` | `OPENAI_API_KEY` (server only, gitignored) |
+| `.env` | `OPENAI_API_KEY` and optional `SHOPMONKEY_API_KEY` (gitignored) |
 | `CLAUDE.md` | Project index for agents |
 | `.claude/agents/ai-eng-bootcamp-agent.md` | TeamOS agent stub |
 
@@ -121,7 +125,7 @@ source .venv/bin/activate
 streamlit run app.py
 ```
 
-Use sidebar: **Cost Estimator** | **Bootcamp Q&A**
+Use sidebar: **Cost Estimator** | **Bootcamp Q&A** | **AI FinOps** | **ShopMonkey**
 
 ### Verify without browser
 
@@ -170,6 +174,9 @@ source .venv/bin/activate
 | GET | `/health` | — | `{"status":"ok"}` |
 | POST | `/estimate` | `input_tokens`, `result_shape`, `primary_steps`, `checker_steps`, `tasks_per_day` | `recommendation`, `likely_comparison`, `scenario_ranges` |
 | POST | `/ask` | `{"question":"..."}` | `{"answer":"...","confidence":0.85}` |
+| GET | `/shopmonkey/catalog` | — | Allowed vs blocked ShopMonkey API surfaces |
+| GET | `/shopmonkey/status` | — | Key configured / connected |
+| GET | `/shopmonkey/snapshot` | `limit` | Read-only orders, customers, appointments |
 
 **Contract** = shapes in `server/schemas.py`. Invalid input → rejected before logic runs.
 
@@ -201,6 +208,7 @@ source .venv/bin/activate
 | `402` / no credits | OpenAI billing empty | Add credits at platform.openai.com billing |
 | Streamlit "API not running" | uvicorn stopped | Restart Terminal 1 |
 | `/docs` blank / refused | Same as connection refused | Server must be running first |
+| ShopMonkey page: key missing | No `SHOPMONKEY_API_KEY` | Add key to `.env`, restart API |
 
 **Streamlit email prompt (first run):** leave blank → Enter. Optional signup only.
 
@@ -212,6 +220,7 @@ source .venv/bin/activate
 
 ```text
 OPENAI_API_KEY=sk-proj-your-key-here
+SHOPMONKEY_API_KEY=your-shopmonkey-key
 ```
 
 | ❌ Wrong | ✅ Right |
@@ -264,7 +273,59 @@ Same product thinking; bootcamp = Python learning scaffold; ai-build-crew = prod
 5. **Bootcamp Q&A** → ask "What is RAG?" → real answer
 6. Browser: `http://127.0.0.1:8000/docs` → show contract
 
-**One-liner:** "I built a FastAPI service with two endpoints; Streamlit is a thin client."
+**One-liner:** "I built a FastAPI service; Streamlit is a thin client, and AI FinOps links usage cost to reviewed outcomes."
+
+---
+
+## 13. AI FinOps MVP
+
+**Contract:** [`docs/ai-finops-kpi-contract.md`](ai-finops-kpi-contract.md)
+
+| Capability | Location |
+|------------|----------|
+| Usage and outcome storage | `server/usage_repository.py` (local SQLite) |
+| Cost, cache, budget, attribution KPIs | `server/finops_service.py` |
+| Usage receipt and outcome review | `POST /ask`, `POST /finops/usage/{request_id}/outcome` |
+| Dashboard APIs | `GET /finops/kpis`, `/finops/spend/daily`, `/finops/attribution` |
+| Dashboard | Sidebar → **AI FinOps** |
+
+### Learning flow
+
+1. Start with `./start.sh`.
+2. Open **Bootcamp Q&A** and submit a question.
+3. Review the usage receipt and accept or reject the outcome.
+4. Open **AI FinOps** to see spend, cache, outcomes, attribution, and budget state.
+
+### Control settings (`.env`)
+
+```text
+AI_DAILY_BUDGET_USD=5.00
+AI_ALERT_THRESHOLD_PCT=0.80
+AI_HARD_STOP_ENABLED=false
+```
+
+Keep hard stops off while learning. Current notifications are in-app only. External Slack/email,
+audited overrides, Finance-validated value, invoice reconciliation, and durable Render persistence
+remain later phases.
+
+---
+
+## 14. ShopMonkey integration
+
+**Contract:** [`docs/shopmonkey-api-contract.md`](shopmonkey-api-contract.md)
+
+This is an **API integration**, not a ShopMonkey reskin. Our Streamlit page calls our FastAPI
+server; only the server talks to `https://api.shopmonkey.cloud/v3`.
+
+| Capability | Location |
+|------------|----------|
+| Allowed vs blocked surfaces | `GET /shopmonkey/catalog` |
+| Key status | `GET /shopmonkey/status` |
+| Read-only shop snapshot | `GET /shopmonkey/snapshot` |
+| Dashboard | Sidebar → **ShopMonkey** |
+
+Live data needs `SHOPMONKEY_API_KEY` from ShopMonkey **Settings → Integration → API Keys**.
+Catalog works without a key.
 
 ---
 
