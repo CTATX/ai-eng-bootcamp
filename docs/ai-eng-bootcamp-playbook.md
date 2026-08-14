@@ -20,6 +20,7 @@ TAI Labs Week 1 learning artifact. Load this doc on demand — do not paste into
 10. [Concepts glossary](#10-concepts-glossary)
 11. [Tie to ai-build-crew](#11-tie-to-ai-build-crew)
 12. [Demo script](#12-demo-script)
+13. [Shop intelligence (plan)](#13-shop-intelligence-plan)
 
 ---
 
@@ -76,6 +77,8 @@ Browser / curl
 | `.env` | `OPENAI_API_KEY` (server only, gitignored) |
 | `CLAUDE.md` | Project index for agents |
 | `.claude/agents/ai-eng-bootcamp-agent.md` | TeamOS agent stub |
+| `docs/shop-intelligence-plan.md` | Licensed ShopMonkey shop-intel phases P0–P7 |
+| `docs/shop-intelligence-briefing.schema.json` | Chat briefing contract (FACT / INFERRED / UNKNOWN) |
 
 ---
 
@@ -265,6 +268,17 @@ Same product thinking; bootcamp = Python learning scaffold; ai-build-crew = prod
 6. Browser: `http://127.0.0.1:8000/docs` → show contract
 
 **One-liner:** "I built a FastAPI service with two endpoints; Streamlit is a thin client."
+
+---
+
+## 13. Shop intelligence (plan)
+
+Licensed shop owner using ShopMonkey’s **official API** for internal analysis. Not a reskin.
+
+- Plan: [`docs/shop-intelligence-plan.md`](shop-intelligence-plan.md)
+- Briefing contract: [`docs/shop-intelligence-briefing.schema.json`](shop-intelligence-briefing.schema.json)
+
+**Next code is P1 (warehouse ingest) only.** Chat and multi-agent stay parked until facts exist.
 
 ---
 

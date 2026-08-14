@@ -48,6 +48,7 @@ Project index entry: [my-project/projects/ai-eng-bootcamp](https://github.com/CT
 |-------|--------|
 | `GET /health`, `POST /ask`, `POST /estimate` | Done |
 | Streamlit → API (both pages) | Done |
+| Shop intelligence (ShopMonkey, licensed shop) | **P0 plan** — see `docs/shop-intelligence-plan.md` |
 | Docker + deploy | Next (syllabus) |
 
 Use sidebar: **Cost Estimator** | **Bootcamp Q&A**
