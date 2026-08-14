@@ -78,7 +78,9 @@ Browser / curl
 | `CLAUDE.md` | Project index for agents |
 | `.claude/agents/ai-eng-bootcamp-agent.md` | TeamOS agent stub |
 | `docs/shop-intelligence-plan.md` | Licensed ShopMonkey shop-intel phases P0–P7 |
+| `docs/shop-intelligence-jtbd.md` | Running JTBD and requirements (rough cut) |
 | `docs/shop-intelligence-briefing.schema.json` | Chat briefing contract (FACT / INFERRED / UNKNOWN) |
+| `pages/3_Shop_Intelligence.py` | Synthetic Porsche warehouse screens |
 
 ---
 
@@ -124,7 +126,7 @@ source .venv/bin/activate
 streamlit run app.py
 ```
 
-Use sidebar: **Cost Estimator** | **Bootcamp Q&A**
+Use sidebar: **Cost Estimator** | **Bootcamp Q&A** | **Shop intelligence**
 
 ### Verify without browser
 
@@ -173,6 +175,9 @@ source .venv/bin/activate
 | GET | `/health` | — | `{"status":"ok"}` |
 | POST | `/estimate` | `input_tokens`, `result_shape`, `primary_steps`, `checker_steps`, `tasks_per_day` | `recommendation`, `likely_comparison`, `scenario_ranges` |
 | POST | `/ask` | `{"question":"..."}` | `{"answer":"...","confidence":0.85}` |
+| GET | `/shop/status` | — | Synthetic warehouse counts (no ShopMonkey key) |
+| GET | `/shop/trends/tickets` | — | Ticket by year |
+| GET | `/shop/parts` | — | Synthetic product list (named vendors, fake SKUs) |
 
 **Contract** = shapes in `server/schemas.py`. Invalid input → rejected before logic runs.
 
@@ -275,10 +280,13 @@ Same product thinking; bootcamp = Python learning scaffold; ai-build-crew = prod
 
 Licensed shop owner using ShopMonkey’s **official API** for internal analysis. Not a reskin.
 
+- JTBD / requirements (running): [`docs/shop-intelligence-jtbd.md`](shop-intelligence-jtbd.md)
 - Plan: [`docs/shop-intelligence-plan.md`](shop-intelligence-plan.md)
 - Briefing contract: [`docs/shop-intelligence-briefing.schema.json`](shop-intelligence-briefing.schema.json)
 
-**Next code is P1 (warehouse ingest) only.** Chat and multi-agent stay parked until facts exist.
+**P1 now:** synthetic Porsche 1980–2025 warehouse. No ShopMonkey key. Sidebar → **Shop intelligence**.
+
+Chat and multi-agent stay parked.
 
 ---
 

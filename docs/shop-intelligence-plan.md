@@ -1,6 +1,6 @@
 # Shop intelligence — plan (P0)
 
-**Status:** plan only. No agents, no live ShopMonkey ingest, no OpenAI spend in this phase.  
+**Status:** P0 plan locked. P1 synthetic warehouse and screens in this repo. No live ShopMonkey ingest. No OpenAI spend.  
 **Mode:** licensed shop owner → official ShopMonkey REST v3 → **our** warehouse and **our** UI.  
 **Not this product:** reskin, iframe, or white-label of ShopMonkey.
 
@@ -25,7 +25,7 @@ You own Customer Data in ShopMonkey (ToS). Storing a copy in our warehouse for y
 
 | You want | Phase | Spend |
 |----------|-------|--------|
-| Fetch years of shop history and store it | **P1** Ingest | ShopMonkey API only (rate-limited) |
+| Fetch years of shop history and store it | **P1** Ingest | Synthetic now (no key). ShopMonkey API when the key exists. |
 | Identify the car; common reasons; parts; average ticket; gotchas | **P2** Fact model | $0 model tokens |
 | Automotive-clean UI + chat that returns a crisp outlined briefing | **P3** Guardrailed chat | Cheap model, warehouse-only context |
 | % likelihood, best/worst case, parts, expected time | **P3** (only if sample exists) | Same |
@@ -40,36 +40,23 @@ You own Customer Data in ShopMonkey (ToS). Storing a copy in our warehouse for y
 ## 3. Target architecture
 
 ```text
-ShopMonkey (your licensed shop)
-        │  official REST v3  (batch, paginated)
-        ▼
-┌─────────────────────────────────────────┐
-│  Ingest (P1)                            │
-│  rate-limit, backoff, watermark         │
-└─────────────────────────────────────────┘
+Synthetic Porsche seed (P1, no key)
         │
         ▼
 ┌─────────────────────────────────────────┐
-│  Warehouse (your copy of your data)     │
+│  Warehouse (SQLite)                     │
 │  vehicles, orders, line items,          │
-│  inspections, payments                  │
+│  catalog, artifact slots                │
 └─────────────────────────────────────────┘
         │
         ▼
-┌─────────────────────────────────────────┐
-│  Fact layer (P2)  — SQL / aggregations  │
-│  no LLM                                 │
-└─────────────────────────────────────────┘
+  Trend + product-list screens (this cut)
         │
         ▼
-┌─────────────────────────────────────────┐
-│  Briefing chat (P3)                     │
-│  retrieve facts → fill contract         │
-│  refuse to invent                       │
-└─────────────────────────────────────────┘
-        │  later only
+ShopMonkey REST ingest (P1b, when key exists)
+        │
         ▼
-   Quote / parts / checklist / closeout agents (P4–P7)
+  Fact layer → briefing chat → agents (P2–P7)
 ```
 
 Streamlit (or later a dedicated UI) talks to **our** FastAPI. Only the server talks to ShopMonkey. Chat never calls ShopMonkey live for history.
@@ -236,7 +223,9 @@ Daily budget already exists as a bootcamp pattern (`/ask`). Reuse a hard cap bef
 
 **P0 — this document.** Locked.
 
-**P1 — warehouse (next code):** ShopMonkey client, SQLite/Postgres tables, backfill job, watermark, `.env` key. No UI except a “last ingest / row counts” status.
+**P1 — warehouse (this cut, no key):** Synthetic Porsche 1980–2025 SQLite warehouse + trend / product-list screens. ShopMonkey client waits for a real key.
+
+**P1b — live ingest:** ShopMonkey client, watermark, backoff. Replaces or sits beside `source=synthetic`.
 
 **P2 — fact API:** `POST /shop/briefing/preview` that returns the schema from SQL only (chat box can wait).
 

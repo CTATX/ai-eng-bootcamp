@@ -10,7 +10,9 @@ TAI Labs Week 1 build: **FastAPI server** + **Streamlit client** — cost estima
 | `app.py` | Streamlit cost estimator → calls `/estimate` |
 | `pages/2_Bootcamp_QA.py` | Streamlit Q&A → calls `/ask` |
 | `docs/ai-eng-bootcamp-playbook.md` | Runbook, troubleshooting, architecture (TeamOS) |
+| `docs/shop-intelligence-jtbd.md` | Running JTBD + requirements (rough cut) |
 | `docs/shop-intelligence-plan.md` | ShopMonkey shop-intel plan (licensed shop, no reskin) |
+| `pages/3_Shop_Intelligence.py` | Synthetic Porsche trends + product list |
 
 Related: [ai-build-crew](https://github.com/CTATX/ai-build-crew) (production cost planner).
 
