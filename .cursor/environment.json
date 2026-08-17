@@ -1,0 +1,20 @@
+{
+  "name": "AI Eng Bootcamp",
+  "install": "bash .cursor/install.sh",
+  "terminals": [
+    {
+      "name": "api",
+      "command": ".venv/bin/uvicorn server.main:app --reload --host 127.0.0.1 --port 8000",
+      "description": "FastAPI server: GET /health, POST /estimate, POST /ask (docs at /docs)."
+    },
+    {
+      "name": "client",
+      "command": ".venv/bin/streamlit run app.py --server.headless true --server.port 8501 --server.address 0.0.0.0",
+      "description": "Streamlit UI: Cost Estimator (/estimate) and Bootcamp Q&A (/ask)."
+    }
+  ],
+  "ports": [
+    { "name": "api", "port": 8000 },
+    { "name": "streamlit", "port": 8501 }
+  ]
+}
