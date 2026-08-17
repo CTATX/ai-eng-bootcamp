@@ -1,0 +1,9 @@
+{
+  "name": "AI Eng Bootcamp",
+  "install": "if ! dpkg -s python3.12-venv >/dev/null 2>&1; then sudo apt-get update -qq && sudo apt-get install -y -qq python3.12-venv; fi && python3 -m venv .venv && .venv/bin/python -m pip install --upgrade pip && .venv/bin/pip install -r requirements.txt",
+  "start": "cd /workspace\nif ! curl -sf http://127.0.0.1:8000/health >/dev/null 2>&1; then\n  nohup .venv/bin/uvicorn server.main:app --host 127.0.0.1 --port 8000 >/tmp/api.log 2>&1 &\nfi\nif ! curl -sf http://127.0.0.1:8501/ >/dev/null 2>&1; then\n  nohup .venv/bin/streamlit run app.py --server.headless true --server.port 8501 --server.address 0.0.0.0 >/tmp/streamlit.log 2>&1 &\nfi\nfor i in $(seq 1 60); do\n  if curl -sf http://127.0.0.1:8000/health >/dev/null 2>&1; then break; fi\n  sleep 1\ndone\necho \"start: api $(curl -sf http://127.0.0.1:8000/health >/dev/null 2>&1 && echo up || echo down), streamlit $(curl -sf http://127.0.0.1:8501/ >/dev/null 2>&1 && echo up || echo down)\"",
+  "ports": [
+    { "name": "api", "port": 8000 },
+    { "name": "streamlit", "port": 8501 }
+  ]
+}
