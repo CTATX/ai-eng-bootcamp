@@ -48,6 +48,7 @@ Project index entry: [my-project/projects/ai-eng-bootcamp](https://github.com/CT
 |-------|--------|
 | `GET /health`, `POST /ask`, `POST /estimate` | Done |
 | Streamlit → API (both pages) | Done |
+| Cloud Agent dev environment (`.cursor/environment.json`) | Done — validated end-to-end, merged (#3) |
 | Docker + deploy | Next (syllabus) |
 
 Use sidebar: **Cost Estimator** | **Bootcamp Q&A**
