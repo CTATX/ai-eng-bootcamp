@@ -31,6 +31,6 @@ else
   done
 fi
 
-echo "Starting Streamlit — sidebar: Cost Estimator | Bootcamp Q&A"
+echo "Starting Streamlit — sidebar: Cost Estimator | Bootcamp Q&A | Shop intelligence"
 echo "Stop everything: Ctrl+C in this terminal."
 streamlit run app.py
