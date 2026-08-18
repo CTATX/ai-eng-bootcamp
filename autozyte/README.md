@@ -41,6 +41,8 @@ python -m shop.cli ingest-ticket 1042     # pull one RO + that car's history
 
 **Release:** see [`CHANGELOG.md`](CHANGELOG.md) and [`docs/releases/`](docs/releases/) (current: `VERSION` file).
 
+**Visual status:** `./start.sh` → sidebar **System Status** (or http://127.0.0.1:8000/docs).
+
 ## Docs
 
 - [Product hierarchy](docs/autozyte-product-hierarchy.md)

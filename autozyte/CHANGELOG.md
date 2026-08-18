@@ -15,6 +15,7 @@ Release manifests (full audit trail): [`docs/releases/`](docs/releases/).
 - `python -m shop.cli ingest-order <uuid>` — pull one order by ShopMonkey API id.
 - ShopMonkey client: `find_orders_by_number`, `lookup_vehicle_by_vin`, `list_vehicle_orders`, `where` filter on `list_orders`.
 - Auto backfill: hypothesis (CLI + API) tries ShopMonkey when a VIN is missing locally and `SHOPMONKEY_API_KEY` is set.
+- **Visual system status** (bootcamp pattern): Streamlit **System Status** page + `GET /shop/system/status` — same payload as CLI; link to FastAPI `/docs` for live calls without terminal.
 - Release tracking: `VERSION`, this changelog, `docs/releases/manifest-v0.2.0.md`.
 
 ### Fixed

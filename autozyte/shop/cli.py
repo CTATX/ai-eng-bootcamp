@@ -12,11 +12,10 @@ from shop.ingest import (
     ingest_order_by_id,
     ingest_order_by_ticket,
     ingest_orders,
-    ingest_status,
 )
-from shop.service import status as warehouse_status
+from shop.shopmonkey_client import ShopmonkeyAPIError, api_key_configured
 from shop.synthetic import seed_if_empty
-from shop.shopmonkey_client import ShopmonkeyAPIError, api_key_configured, auth_status
+from shop.system_status import build_system_status
 
 
 def _print_json(payload: object) -> None:
@@ -24,18 +23,7 @@ def _print_json(payload: object) -> None:
 
 
 def cmd_status(_: argparse.Namespace) -> int:
-    seed_if_empty()
-    payload = {
-        "warehouse": warehouse_status(),
-        "ingest": ingest_status(),
-        "shopmonkey_key_configured": api_key_configured(),
-    }
-    if api_key_configured():
-        try:
-            payload["shopmonkey_auth"] = auth_status()
-        except ShopmonkeyAPIError as exc:
-            payload["shopmonkey_auth_error"] = {"status": exc.status_code, "message": exc.message}
-    _print_json(payload)
+    _print_json(build_system_status())
     return 0
 
 

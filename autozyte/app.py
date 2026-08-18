@@ -9,11 +9,15 @@ st.markdown(
     """
 Licensed shop operations platform. Use the **sidebar**:
 
-1. **Shop intelligence** — history warehouse, trends, catalog (synthetic Porsche until ingest)
-2. **Jake Advisor** — data-based briefing for the service advisor (Powered by FerdAI)
+1. **System Status** — API health, warehouse, ingest, ShopMonkey (replaces CLI status; links to `/docs`)
+2. **Shop intelligence** — history warehouse, trends, catalog
+3. **Jake Advisor** — data-based briefing for the service advisor (Powered by FerdAI)
 
-Start the API:
+Start the stack:
 """
 )
 st.code("./start.sh", language="bash")
-st.caption("Hub: [BadLabz/Projects](https://github.com/BadLabz/Projects)")
+st.caption(
+    f"API docs (live calls): http://127.0.0.1:8000/docs · "
+    "Hub: [BadLabz/Projects](https://github.com/BadLabz/Projects)"
+)

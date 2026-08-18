@@ -20,6 +20,7 @@ from shop.shopmonkey_client import (
     ShopmonkeyConfigError,
     api_key_configured,
 )
+from shop.system_status import build_system_status, product_version
 from shop.synthetic import seed_if_empty
 
 app = FastAPI(title="AutoZyte API")
@@ -33,6 +34,7 @@ def root():
         "health": "/health",
         "docs": "/docs",
         "shop": "GET /shop/status",
+        "system": "GET /shop/system/status",
         "advisor": "POST /advisor/hypothesis",
         "powered_by": "FerdAI",
     }
@@ -40,7 +42,13 @@ def root():
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "product": "AutoZyte"}
+    return {"status": "ok", "product": "AutoZyte", "version": product_version()}
+
+
+@app.get("/shop/system/status")
+def get_system_status():
+    """Same payload as `python -m shop.cli status` — for Streamlit and /docs."""
+    return build_system_status()
 
 
 @app.get("/shop/status")

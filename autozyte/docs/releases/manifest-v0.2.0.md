@@ -47,6 +47,8 @@ ShopMonkey ingest hardening plus **ticket-based ingest** so a live RO in the sho
 |---------|--------|
 | `shop.cli ingest-ticket` | New command |
 | `shop.cli ingest-order` | New command |
+| `GET /shop/system/status` | Same JSON as `shop.cli status` |
+| Streamlit **System Status** | Visual health + try-it buttons + `/docs` link |
 | `POST /advisor/hypothesis` | Auto backfill when VIN missing + key set |
 | `shop.cli hypothesis` | Same backfill |
 
@@ -59,7 +61,7 @@ ShopMonkey ingest hardening plus **ticket-based ingest** so a live RO in the sho
 ```bash
 cd autozyte
 python -m unittest discover -s tests -q
-# Ran 12 tests — OK
+# Ran 14 tests — OK
 ```
 
 | Test file | Covers |
@@ -68,6 +70,7 @@ python -m unittest discover -s tests -q
 | `test_shop_ingest.py` | ShopMonkey order mapping |
 | `test_shop_hypothesis.py` | Jake VIN match / UNKNOWN |
 | `test_shop_ticket_ingest.py` | Ticket ingest + VIN preservation |
+| `test_shop_system_status.py` | CLI/API status payload shape |
 
 ## Upgrade (after publish)
 
@@ -91,9 +94,14 @@ docs/releases/manifest-v0.1.0.md
 docs/releases/README.md
 server/main.py
 shop/cli.py
+shop/system_status.py
 shop/ingest.py
 shop/shopmonkey_client.py
+pages/0_System_Status.py
+api_client.py
+app.py
 tests/test_shop_ticket_ingest.py
+tests/test_shop_system_status.py
 ```
 
 ## Out of scope (next)
@@ -106,7 +114,7 @@ tests/test_shop_ticket_ingest.py
 
 | Check | Result |
 |-------|--------|
-| Unit tests | Pass (12/12) |
+| Unit tests | Pass (14/14) |
 | Secrets in repo | None (`.env` gitignored) |
 | Manifest present | Yes |
 | Semver bump | 0.1.0 → 0.2.0 |
