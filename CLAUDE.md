@@ -48,9 +48,13 @@ Project index entry: [my-project/projects/ai-eng-bootcamp](https://github.com/CT
 |-------|--------|
 | `GET /health`, `POST /ask`, `POST /estimate` | Done |
 | Streamlit → API (both pages) | Done |
+| Shop intelligence | **P0 plan** + **P1 synthetic Porsche warehouse/screens** |
 | Docker + deploy | Next (syllabus) |
 
-Use sidebar: **Cost Estimator** | **Bootcamp Q&A**
+Use sidebar: **Cost Estimator** | **Bootcamp Q&A** | **Shop intelligence**
+
+JTBD / requirements (running, rough cut): `docs/shop-intelligence-jtbd.md`  
+Published paths + screenshots: `docs/experiences.md`
 
 ### Every session — one command (recommended)
 
