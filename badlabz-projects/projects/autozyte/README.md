@@ -11,15 +11,16 @@
 
 ## Repo
 
-https://github.com/GTInternational/autozyte
+https://github.com/BadLabz/autozyte
 
 ## Run locally
 
 ```bash
-git clone https://github.com/GTInternational/autozyte.git
+git clone https://github.com/BadLabz/autozyte.git
 cd autozyte
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
+cp .env.example .env   # add SHOPMONKEY_API_KEY when ready
 ./start.sh
 ```
 
@@ -29,10 +30,6 @@ pip install -r requirements.txt
 - `docs/shop-intelligence-jtbd.md` — requirements
 - `docs/shop-intelligence-plan.md` — P0–P7 build order
 
-## Jake persona
+## Bootcamp (separate org)
 
-**Jake** = human service advisor persona (UI copy). **FerdAI** = agents and reasoning. See product hierarchy doc.
-
-## Bootcamp
-
-Prototype started in [CTATX/ai-eng-bootcamp](https://github.com/CTATX/ai-eng-bootcamp); production code lives in this repo only.
+Prototype started in [CTATX/ai-eng-bootcamp](https://github.com/CTATX/ai-eng-bootcamp); production code lives in **BadLabz/autozyte** only.

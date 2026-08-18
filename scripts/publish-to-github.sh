@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Publish GTInternational/Projects and GTInternational/autozyte to GitHub.
-# Requires: gh auth login with GTInternational org create-repo permission.
+# Publish BadLabz/Projects and BadLabz/autozyte to GitHub.
+# Requires: gh auth login with BadLabz org create-repo permission.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -10,9 +10,8 @@ if ! gh auth status >/dev/null 2>&1; then
   exit 1
 fi
 
-if ! gh api orgs/GTInternational --jq .login >/dev/null 2>&1; then
-  echo "Org GTInternational not found. Create it first:"
-  echo "  https://github.com/organizations/plan"
+if ! gh api orgs/BadLabz --jq .login >/dev/null 2>&1; then
+  echo "Org BadLabz not found or no access. Check: https://github.com/BadLabz"
   exit 1
 fi
 
@@ -42,13 +41,13 @@ publish_repo() {
   fi
 }
 
-publish_repo "$ROOT/gtinternational-projects" "GTInternational/Projects" \
-  "Initial GTInternational Projects hub — AutoZyte and Spoiler Saver index"
+publish_repo "$ROOT/badlabz-projects" "BadLabz/Projects" \
+  "Initial BadLabz Projects hub — AutoZyte and Spoiler Saver index"
 
-publish_repo "$ROOT/autozyte" "GTInternational/autozyte" \
+publish_repo "$ROOT/autozyte" "BadLabz/autozyte" \
   "Initial AutoZyte — shop, FerdAI, ZyteShelf, Zyren"
 
 echo ""
 echo "Done."
-echo "  https://github.com/GTInternational/Projects"
-echo "  https://github.com/GTInternational/autozyte"
+echo "  https://github.com/BadLabz/Projects"
+echo "  https://github.com/BadLabz/autozyte"

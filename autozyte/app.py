@@ -16,4 +16,4 @@ Start the API:
 """
 )
 st.code("./start.sh", language="bash")
-st.caption("Hub: [GTInternational/Projects](https://github.com/GTInternational/Projects)")
+st.caption("Hub: [BadLabz/Projects](https://github.com/BadLabz/Projects)")

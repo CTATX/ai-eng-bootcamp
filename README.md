@@ -2,9 +2,9 @@
 
 TAI Labs Week 1 build: **FastAPI server** + **Streamlit client** — cost estimation and Q&A.
 
-**Shop / AutoZyte production code** moved to [`autozyte/`](autozyte/) (target repo: [GTInternational/autozyte](https://github.com/GTInternational/autozyte)).
+**Shop / AutoZyte production code** moved to [`autozyte/`](autozyte/) → [BadLabz/autozyte](https://github.com/BadLabz/autozyte).
 
-Hub: [GTInternational/Projects](https://github.com/GTInternational/Projects)
+Hub: [BadLabz/Projects](https://github.com/BadLabz/Projects) · Org: [BadLabz](https://github.com/BadLabz)
 
 ## What this repo is
 
@@ -13,7 +13,8 @@ Hub: [GTInternational/Projects](https://github.com/GTInternational/Projects)
 | `server/` | FastAPI — `GET /health`, `POST /estimate`, `POST /ask` |
 | `pages/1_Cost_Estimator.py` | Streamlit cost estimator |
 | `pages/2_Bootcamp_QA.py` | Streamlit Q&A |
-| `autozyte/` | **AutoZyte product** (split tree — push to GTInternational/autozyte) |
+| `autozyte/` | **AutoZyte product** — push to BadLabz/autozyte |
+| `badlabz-projects/` | **Projects hub** — push to BadLabz/Projects |
 | `docs/ai-eng-bootcamp-playbook.md` | Runbook |
 
 ## Setup

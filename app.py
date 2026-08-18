@@ -12,7 +12,7 @@ Welcome. Use the **sidebar on the left** to switch apps:
 1. **Cost Estimator** — model cost math (`POST /estimate`)
 2. **Bootcamp Q&A** — ask questions (`POST /ask`)
 
-Shop production code lives in **[AutoZyte](https://github.com/GTInternational/autozyte)** (GTInternational).
+Shop production code lives in **[AutoZyte](https://github.com/BadLabz/autozyte)** ([BadLabz](https://github.com/BadLabz) org).
 
 Start the API:
 """

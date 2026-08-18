@@ -51,26 +51,24 @@ If it **describes who consumes the output** → **Jake** persona in product copy
 
 ---
 
-## GTInternational Projects (hub)
+## BadLabz Projects (hub)
 
-**Home hub:** [GTInternational/Projects](https://github.com/GTInternational/Projects) — project index for GT International work (replaces `CTATX/my-project` for this portfolio).
+**Home hub:** [BadLabz/Projects](https://github.com/BadLabz/Projects) — product index (separate from [CTATX/ai-eng-bootcamp](https://github.com/CTATX/ai-eng-bootcamp) training).
 
-| Project | Repo (target) | Notes |
-|---------|---------------|--------|
-| **AutoZyte** | `GTInternational/autozyte` | Shop parent — Shop, FerdAI, ZyteShelf, Zyren |
-| **Spoiler Saver** | `GTInternational/spoiler-saver` (or as indexed in Projects) | Separate product line; same org hub |
-| **AI Eng Bootcamp** | [CTATX/ai-eng-bootcamp](https://github.com/CTATX/ai-eng-bootcamp) | TAI Labs teaching scaffold; shop code moves out to AutoZyte |
+| Project | Repo | Role |
+|---------|------|------|
+| **AutoZyte** | `BadLabz/autozyte` | Shop parent — Shop, FerdAI, ZyteShelf, Zyren |
+| **Spoiler Saver** | `BadLabz/spoiler-saver` (TBD) | Separate product line |
+| **AI Eng Bootcamp** | `CTATX/ai-eng-bootcamp` | Training only — different org/access |
 
-Index entries live under `Projects/projects/` (e.g. `projects/autozyte`, `projects/spoiler-saver`, `projects/ai-eng-bootcamp`).
-
-TeamOS agent stubs: link from Projects hub when mirrored; local copies remain in each repo’s `.claude/agents/`.
+Index entries live under `Projects/projects/` in the hub repo.
 
 ---
 
 ## Repo / folder tree (target)
 
 ```text
-GTInternational/autozyte/
+BadLabz/autozyte/
 ├── shop/              # History warehouse, ShopMonkey ingest, advisor UI surfaces
 ├── ferdai/            # AI layer — hypothesis, orchestrator, agents (supports AutoZyte)
 ├── zyteshelf/         # Inventory parent (see ZyteShelf family below)
@@ -125,5 +123,5 @@ Sub-modules reduce agent scope — each owns one slice of shelf work:
 
 | Date | Change |
 |------|--------|
-| 2026-08-18 | Hub set to GTInternational/Projects; AutoZyte target repo GTInternational/autozyte. |
+| 2026-08-18 | Hub set to BadLabz/Projects; AutoZyte repo BadLabz/autozyte. |
 | 2026-08-18 | Locked AutoZyte parent, FerdAI Intel Inside, Jake persona vs agent, ZyteShelf family. |

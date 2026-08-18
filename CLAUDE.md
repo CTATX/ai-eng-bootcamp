@@ -24,11 +24,11 @@ Do **not** preload full TeamOS v2.0 or this playbook every session. Load playboo
 | Investigation | `Use TeamOS Investigation for [topic]` |
 | Documentation Evaluation | `Use TeamOS Documentation Evaluation for [topic]` |
 
-Agent stubs (GitHub): [GTInternational/Projects](https://github.com/GTInternational/Projects) hub · local [.claude/agents/](.claude/agents/)
+Agent stubs: [BadLabz/Projects](https://github.com/BadLabz/Projects) hub · local [.claude/agents/](.claude/agents/)
 
 Bootcamp agent: [.claude/agents/ai-eng-bootcamp-agent.md](.claude/agents/ai-eng-bootcamp-agent.md)
 
-Project index: [GTInternational/Projects](https://github.com/GTInternational/Projects) — see `projects/ai-eng-bootcamp`, `projects/autozyte`, `projects/spoiler-saver`
+Project index: [BadLabz/Projects](https://github.com/BadLabz/Projects) — `projects/autozyte`, `projects/spoiler-saver`, `projects/ai-eng-bootcamp`
 
 **Engineering TeamOS:** [ai-build-crew/TEAM_OS.md](https://github.com/CTATX/ai-build-crew/blob/main/TEAM_OS.md)
 
@@ -36,12 +36,12 @@ Project index: [GTInternational/Projects](https://github.com/GTInternational/Pro
 
 | Asset | GitHub |
 |-------|--------|
-| **GTInternational Projects** (home hub) | [GTInternational/Projects](https://github.com/GTInternational/Projects) |
-| AutoZyte (shop platform) | `GTInternational/autozyte` (target repo) |
-| Spoiler Saver | Indexed in GTInternational/Projects |
-| ai-eng-bootcamp (TAI Labs) | [CTATX/ai-eng-bootcamp](https://github.com/CTATX/ai-eng-bootcamp) |
+| **BadLabz Projects** (product hub) | [BadLabz/Projects](https://github.com/BadLabz/Projects) |
+| AutoZyte (shop platform) | [BadLabz/autozyte](https://github.com/BadLabz/autozyte) |
+| Spoiler Saver | Indexed in BadLabz/Projects |
+| ai-eng-bootcamp (TAI Labs / training) | [CTATX/ai-eng-bootcamp](https://github.com/CTATX/ai-eng-bootcamp) |
 | ai-build-crew | [CTATX/ai-build-crew](https://github.com/CTATX/ai-build-crew) |
-| badlabz (Product OS assets) | [CTATX/badlabz](https://github.com/CTATX/badlabz) |
+| badlabz legacy Product OS assets | [CTATX/badlabz](https://github.com/CTATX/badlabz) |
 
 ## Build status
 
@@ -49,7 +49,7 @@ Project index: [GTInternational/Projects](https://github.com/GTInternational/Pro
 |-------|--------|
 | `GET /health`, `POST /ask`, `POST /estimate` | Done |
 | Streamlit → API (Cost Estimator + Q&A) | Done |
-| **AutoZyte** (shop, FerdAI, ZyteShelf, Zyren) | **`autozyte/`** → [GTInternational/autozyte](https://github.com/GTInternational/autozyte) |
+| **AutoZyte** (shop, FerdAI, ZyteShelf, Zyren) | **`autozyte/`** → [BadLabz/autozyte](https://github.com/BadLabz/autozyte) |
 | Docker + deploy (bootcamp API) | Next (syllabus) |
 
 Use sidebar: **Cost Estimator** | **Bootcamp Q&A**

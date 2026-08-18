@@ -4,5 +4,5 @@ __pycache__/
 .env
 .streamlit/secrets.toml
 autozyte/.venv/
-autozyte/data/*.sqlite3
-data/*.db
+autozyte/data/
+data/

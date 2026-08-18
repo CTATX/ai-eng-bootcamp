@@ -9,7 +9,7 @@ Licensed shop operations platform for GT International. **Not a ShopMonkey reski
 | **zyteshelf/** | Inventory — ZyteShelf, ZyteBin, ZyteStock, ZyteLedger |
 | **zyren/** | AR companion (holding) |
 
-Hub: [GTInternational/Projects](https://github.com/GTInternational/Projects)
+Hub: [BadLabz/Projects](https://github.com/BadLabz/Projects)
 
 ## Setup
 
