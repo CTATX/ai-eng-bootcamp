@@ -6,17 +6,18 @@ import os
 import tempfile
 import unittest
 
-_TMP = tempfile.TemporaryDirectory()
-os.environ["SHOP_INTEL_DB_PATH"] = os.path.join(_TMP.name, "shop.sqlite3")
-
 from server.shop_service import job_artifacts, parts_catalog, status, ticket_trend
 from server.shop_synthetic import ORDER_COUNT, VEHICLE_COUNT, seed_if_empty
 from server.shop_warehouse import connect
+
+_TMP = tempfile.TemporaryDirectory()
+_DB_PATH = os.path.join(_TMP.name, "synthetic.sqlite3")
 
 
 class SyntheticPorscheTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
+        os.environ["SHOP_INTEL_DB_PATH"] = _DB_PATH
         seed_if_empty()
 
     def test_status_is_synthetic_without_a_key(self) -> None:

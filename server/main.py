@@ -4,7 +4,16 @@ from fastapi import FastAPI, HTTPException
 
 from server.estimate_service import run_estimate
 from server.openai_client import ask_openai
-from server.schemas import AskRequest, AskResponse, EstimateRequest, EstimateResponse
+from server.schemas import (
+    AskRequest,
+    AskResponse,
+    EstimateRequest,
+    EstimateResponse,
+    HypothesisRequest,
+)
+from server.shop_hypothesis import build_hypothesis
+from server.shop_ingest import ingest_orders, ingest_status
+from server.shopmonkey_client import ShopmonkeyAPIError, ShopmonkeyConfigError
 from server.shop_service import (
     comeback_count,
     gotchas,
@@ -31,6 +40,7 @@ def root():
         "estimate": "POST /estimate",
         "ask": "POST /ask",
         "shop": "GET /shop/status",
+        "jake": "POST /advisor/hypothesis",
     }
 
 
@@ -117,3 +127,38 @@ def get_job_artifacts():
 @app.get("/shop/gotchas")
 def get_gotchas():
     return {"comeback_orders": comeback_count(), "events": gotchas()}
+
+
+@app.post("/advisor/hypothesis")
+def advisor_hypothesis(body: HypothesisRequest):
+    """Jake — data-based hypothesis from warehouse. No LLM."""
+    if not any([body.vin, body.year, body.make, body.model]):
+        raise HTTPException(
+            status_code=422,
+            detail="Provide VIN or year + make + model.",
+        )
+    return build_hypothesis(
+        vin=body.vin,
+        year=body.year,
+        make=body.make,
+        model=body.model,
+        engine=body.engine,
+        complaint=body.complaint,
+        mileage=body.mileage,
+    )
+
+
+@app.get("/shop/ingest/status")
+def get_ingest_status():
+    return ingest_status()
+
+
+@app.post("/shop/ingest")
+def run_ingest(max_pages: int | None = None):
+    """Pull ShopMonkey orders when SHOPMONKEY_API_KEY is set."""
+    try:
+        return ingest_orders(max_pages=max_pages)
+    except ShopmonkeyConfigError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except ShopmonkeyAPIError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.message) from exc

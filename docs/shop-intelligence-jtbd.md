@@ -2,7 +2,7 @@
 
 **Status:** rough cut, living. Append when CT shares more. Do not polish away intent.  
 **Owner:** CT (shop owner / product).  
-**Last updated:** 2026-08-14
+**Last updated:** 2026-08-18
 
 Related: [plan](shop-intelligence-plan.md) · [briefing schema](shop-intelligence-briefing.schema.json)
 
@@ -23,6 +23,55 @@ This file is the **intake log**. The plan is the **build order**. If they disagr
 | J7 | Close the money and the shelf | Advisor / accounting | Bundle, restock reco, payment closeout |
 | J8 | Attach how-to to the job | Tech | Schematics, take-apart, build steps, images, videos per job (later) |
 | J9 | Prototype without production keys or token burn | CT | Synthetic warehouse + screens now; ShopMonkey key later |
+| J10 | Advisor gets a hypothesis before talking to the customer | Jake (service advisor persona) | One-pass briefing: vehicle match, top reasons, parts, ticket/time, gotchas — FACT / INFERRED / UNKNOWN |
+
+---
+
+## Persona — Jake (service advisor)
+
+**Who:** Jake is the licensed shop's service advisor — not customer-facing chat, not a ShopMonkey reskin.
+
+**Job:** When a car comes in (VIN or YMM + complaint), produce a **data-based hypothesis** from **this shop's** stored history before Jake quotes ETA or scope to the customer.
+
+**Output shape:** Crisp outlined card (briefing JSON + Streamlit page), not a chat novel.
+
+**Guardrails (locked):**
+- Every claim tagged **FACT** (in warehouse), **INFERRED** (small-n aggregation), or **UNKNOWN** (gap called out).
+- **No silent fill.** Orchestrator slots (staff, vendors, procedure, tools) stay UNKNOWN until built.
+- **Human gate:** Jake approves before the customer hears ETA or scope.
+
+**What Jake gets now (P2):**
+- Vehicle match (VIN best, else YMM + engine)
+- Ranked common reasons from order services
+- Parts sold for the top reason
+- Observed ticket range and labor hours (when recorded)
+- Gotchas from shop history (comebacks, deferred/recommended lines)
+- Likelihood statement with explicit `n` — not a Porsche diagnosis
+
+**What Jake does not get yet:** live vendor stock, OEM procedures, torque, 3D, quote agent, checklist agent — see orchestrator UNKNOWN slots.
+
+---
+
+## How to run (Jake cut)
+
+No ShopMonkey key required for synthetic Porsche.
+
+```bash
+./start.sh
+# Sidebar → Jake Advisor
+# Or CLI:
+python -m server.shop_cli status
+python -m server.shop_cli hypothesis --vin SYNWP020140002 --complaint "AOS"
+```
+
+**With ShopMonkey key** (live ingest, P1b):
+
+1. Copy `.env.example` → `.env`
+2. Add `SHOPMONKEY_API_KEY` from ShopMonkey → Settings → Integration → API Keys
+3. Ingest: `python -m server.shop_cli ingest --max-pages 5` (paginated; resumes watermark)
+4. Hypothesis runs on **mixed** warehouse (`source=synthetic|shopmonkey` per row)
+
+API: `POST /advisor/hypothesis` · ingest status `GET /shop/ingest/status`
 
 ---
 
@@ -123,8 +172,9 @@ Source tag on every warehouse row: `synthetic`. Screens must say so.
 2. **Trends** — ticket by year, reason mix, model mix, comebacks.
 3. **Product list** — catalog by vendor (synthetic).
 4. **Job packet holes** — designs / schematics / steps / media = UNKNOWN until licensed content exists.
+5. **Jake Advisor** — intake → hypothesis briefing (P2). No LLM.
 
-Chat window and agents are **specified**, not built.
+Chat orchestrator and specialist agents are **specified**, not built.
 
 ---
 
@@ -142,4 +192,5 @@ Chat window and agents are **specified**, not built.
 | Date | Change |
 |------|--------|
 | 2026-08-14 | Created from CT messages (legal, product vision, plan-first, synthetic P1, running doc). |
+| 2026-08-18 | Jake persona (J10), P2 hypothesis CLI + API + Streamlit page; P1b ingest mapper. |
 | 2026-08-14 | Posted actual GitHub paths + screenshots for all three app experiences: [docs/experiences.md](experiences.md). |

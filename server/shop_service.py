@@ -6,6 +6,7 @@ from typing import Any
 
 from server.shop_synthetic import seed_if_empty
 from server.shop_warehouse import connect
+from server.shopmonkey_client import api_key_configured
 
 
 def _rows(sql: str, params: tuple = ()) -> list[dict[str, Any]]:
@@ -52,6 +53,7 @@ def status() -> dict[str, Any]:
         ).fetchone()
     return {
         "source": source["value"] if source else "unknown",
+        "shopmonkey_key_configured": api_key_configured(),
         "shopmonkey_key_required": False,
         "disclaimer": disclaimer["value"] if disclaimer else "",
         "makes": makes,
