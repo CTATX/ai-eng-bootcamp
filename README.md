@@ -28,7 +28,7 @@ PR: https://github.com/CTATX/ai-eng-bootcamp/pull/2
 | `docs/shop-intelligence-plan.md` | ShopMonkey shop-intel plan (licensed shop, no reskin) |
 | `pages/3_Shop_Intelligence.py` | Synthetic Porsche trends + product list |
 
-Related: [ai-build-crew](https://github.com/CTATX/ai-build-crew) (production cost planner).
+Related: [GTInternational/Projects](https://github.com/GTInternational/Projects) (hub) · [ai-build-crew](https://github.com/CTATX/ai-build-crew) (production cost planner)
 
 ## Setup
 

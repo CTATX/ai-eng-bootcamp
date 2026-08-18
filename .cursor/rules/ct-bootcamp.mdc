@@ -20,7 +20,7 @@ Do not re-teach fundamentals if the playbook already covers them.
 ## Token discipline
 
 - Index in `CLAUDE.md`; load TeamOS v2.0 / full playbook only when invoked.
-- TeamOS agents: `Use TeamOS [Agent] for [topic]` → GitHub `CTATX/my-project/.claude/agents/`
+- TeamOS agents: `Use TeamOS [Agent] for [topic]` → [GTInternational/Projects](https://github.com/GTInternational/Projects) hub (agent stubs per repo)
 
 ## Secrets
 

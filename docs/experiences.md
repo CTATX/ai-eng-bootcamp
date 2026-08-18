@@ -71,15 +71,16 @@ Raw (always shows the picture, no GitHub chrome):
 
 ---
 
-## Other GitHub experiences (same product OS)
+## Other GitHub experiences (GTInternational Projects hub)
 
 | Experience | URL |
 |------------|-----|
-| Pull request for this work | https://github.com/CTATX/ai-eng-bootcamp/pull/2 |
-| my-project home hub | https://github.com/CTATX/my-project |
-| Bootcamp project index on my-project | https://github.com/CTATX/my-project/tree/main/projects/ai-eng-bootcamp |
+| **GTInternational Projects** (home hub) | https://github.com/GTInternational/Projects |
+| AutoZyte (target repo) | https://github.com/GTInternational/autozyte |
+| Spoiler Saver (indexed in Projects) | https://github.com/GTInternational/Projects |
+| Pull request for bootcamp / shop prototype | https://github.com/CTATX/ai-eng-bootcamp/pull/6 |
+| ai-eng-bootcamp (TAI Labs) | https://github.com/CTATX/ai-eng-bootcamp |
 | ai-build-crew (production cost planner) | https://github.com/CTATX/ai-build-crew |
-| Cursor agent run for this thread | https://cursor.com/agents/bc-c0bbb8b2-99d0-4d96-815c-3a0d560f11ee |
 
 ---
 
