@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Boot AI Eng Bootcamp — API server + Streamlit UI (one command, two processes).
+# AutoZyte — API + Streamlit (shop intelligence + Jake advisor).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -15,9 +15,8 @@ source .venv/bin/activate
 
 if lsof -i :8000 -sTCP:LISTEN -t >/dev/null 2>&1; then
   echo "Port 8000 already in use — API may already be running."
-  echo "If not, stop it: lsof -i :8000  then  kill <PID>"
 else
-  echo "Starting API server on http://127.0.0.1:8000 ..."
+  echo "Starting AutoZyte API on http://127.0.0.1:8000 ..."
   uvicorn server.main:app --reload --host 127.0.0.1 --port 8000 &
   UVICORN_PID=$!
   trap 'kill "$UVICORN_PID" 2>/dev/null || true' EXIT INT TERM
@@ -31,7 +30,5 @@ else
   done
 fi
 
-echo "Starting Streamlit — sidebar: Cost Estimator | Bootcamp Q&A"
-echo "AutoZyte (shop): see ./autozyte/ or GTInternational/autozyte"
-echo "Stop everything: Ctrl+C in this terminal."
+echo "Starting Streamlit — Shop intelligence | Jake Advisor (Powered by FerdAI)"
 streamlit run app.py
