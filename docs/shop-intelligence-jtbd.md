@@ -29,9 +29,16 @@ This file is the **intake log**. The plan is the **build order**. If they disagr
 
 ## Persona — Jake (service advisor)
 
-**Who:** Jake is the licensed shop's service advisor — not customer-facing chat, not a ShopMonkey reskin.
+**Who:** Jake is the **human service advisor persona** we design for — not customer-facing chat, not a ShopMonkey reskin, **not an AI agent name**.
 
-**Job:** When a car comes in (VIN or YMM + complaint), produce a **data-based hypothesis** from **this shop's** stored history before Jake quotes ETA or scope to the customer.
+**Naming rule (locked):**  
+- **Jake** = role + UX voice (“briefing for the advisor at the desk”).  
+- **FerdAI** = anything that reasons, orchestrates, or runs as an agent (hypothesis engine, chat, quote agent).  
+- Code/APIs use `advisor` (e.g. `POST /advisor/hypothesis`), not `jake` as a system id.
+
+See [autozyte-product-hierarchy.md](autozyte-product-hierarchy.md) for full product map.
+
+**Job:** When a car comes in (VIN or YMM + complaint), produce a **data-based hypothesis** from **this shop's** stored history before Jake (the human) quotes ETA or scope to the customer.
 
 **Output shape:** Crisp outlined card (briefing JSON + Streamlit page), not a chat novel.
 
@@ -192,5 +199,6 @@ Chat orchestrator and specialist agents are **specified**, not built.
 | Date | Change |
 |------|--------|
 | 2026-08-14 | Created from CT messages (legal, product vision, plan-first, synthetic P1, running doc). |
+| 2026-08-18 | Locked product hierarchy: AutoZyte, FerdAI, ZyteShelf family, Jake persona — [autozyte-product-hierarchy.md](autozyte-product-hierarchy.md). |
 | 2026-08-18 | Jake persona (J10), P2 hypothesis CLI + API + Streamlit page; P1b ingest mapper. |
 | 2026-08-14 | Posted actual GitHub paths + screenshots for all three app experiences: [docs/experiences.md](experiences.md). |
