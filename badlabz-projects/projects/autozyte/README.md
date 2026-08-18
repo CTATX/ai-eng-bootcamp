@@ -29,6 +29,12 @@ cp .env.example .env   # add SHOPMONKEY_API_KEY when ready
 - `docs/autozyte-product-hierarchy.md` — naming locks
 - `docs/shop-intelligence-jtbd.md` — requirements
 - `docs/shop-intelligence-plan.md` — P0–P7 build order
+- `docs/releases/` — release manifests (audit trail)
+- `CHANGELOG.md` — version history
+
+## Current release
+
+Check `VERSION` in repo root. Latest manifest: `docs/releases/manifest-v*.md`.
 
 ## Bootcamp (separate org)
 

@@ -39,6 +39,8 @@ python -m shop.cli ingest --max-pages 5   # requires SHOPMONKEY_API_KEY
 python -m shop.cli ingest-ticket 1042     # pull one RO + that car's history
 ```
 
+**Release:** see [`CHANGELOG.md`](CHANGELOG.md) and [`docs/releases/`](docs/releases/) (current: `VERSION` file).
+
 ## Docs
 
 - [Product hierarchy](docs/autozyte-product-hierarchy.md)

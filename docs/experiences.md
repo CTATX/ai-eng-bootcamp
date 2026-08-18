@@ -13,17 +13,15 @@ Screenshots: [`docs/examples/`](examples/)
 
 | Experience | Repo |
 |------------|------|
-| Shop intelligence, Jake Advisor, FerdAI | [`autozyte/`](../../autozyte/) → **GTInternational/autozyte** |
-
-See [`autozyte-split.md`](autozyte-split.md) for publish steps.
+| Shop intelligence, Jake Advisor, FerdAI | [`autozyte/`](../autozyte/) → **[BadLabz/autozyte](https://github.com/BadLabz/autozyte)** (see `VERSION` + `docs/releases/`) |
 
 ## Hub
 
 | Link | URL |
 |------|-----|
-| GTInternational Projects | https://github.com/GTInternational/Projects |
-| ai-eng-bootcamp | https://github.com/CTATX/ai-eng-bootcamp |
-| AutoZyte (target) | https://github.com/GTInternational/autozyte |
+| **BadLabz** (org) | https://github.com/BadLabz |
+| BadLabz Projects | https://github.com/BadLabz/Projects |
+| ai-eng-bootcamp (training) | https://github.com/CTATX/ai-eng-bootcamp |
 
 ## Run bootcamp
 

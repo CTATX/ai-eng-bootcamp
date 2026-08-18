@@ -5,7 +5,10 @@ Run from the **ai-eng-bootcamp** workspace root on a machine where `gh auth logi
 ## Prerequisites
 
 1. Org exists: https://github.com/BadLabz
-2. `gh auth login` (your account, not the cloud agent cursor bot)
+2. `gh auth login` (your account — **not** the cloud agent cursor bot)
+3. Release artifacts for the version in `autozyte/VERSION`:
+   - `autozyte/CHANGELOG.md` entry
+   - `autozyte/docs/releases/manifest-vX.Y.Z.md`
 
 ## One command
 
@@ -14,36 +17,41 @@ chmod +x scripts/publish-to-github.sh
 ./scripts/publish-to-github.sh
 ```
 
-Creates and pushes:
+Creates or updates and pushes:
 
-- **BadLabz/Projects** — this hub (`badlabz-projects/`)
-- **BadLabz/autozyte** — shop platform (`autozyte/`)
+- **BadLabz/Projects** — hub (`badlabz-projects/`)
+- **BadLabz/autozyte** — shop platform (`autozyte/`) with git tag `vX.Y.Z`
 
-## Manual
+The script **blocks** publish if the manifest for `VERSION` is missing.
 
-### Projects hub
-
-```bash
-cd badlabz-projects
-git init && git branch -M main
-git add -A && git commit -m "Initial BadLabz Projects hub"
-gh repo create BadLabz/Projects --public --source=. --remote=origin --push
-```
-
-### AutoZyte
+## After publish (Mac shop clone)
 
 ```bash
-cd ../autozyte
-git init && git branch -M main
-git add -A && git commit -m "Initial AutoZyte"
-gh repo create BadLabz/autozyte --public --source=. --remote=origin --push
+cd ~/autozyte
+git pull origin main
+git tag -l 'v*'    # confirm tag, e.g. v0.2.0
+cat VERSION
+cat docs/releases/manifest-v0.2.0.md
 ```
+
+## Release checklist (best practice)
+
+| Step | Done when |
+|------|-----------|
+| Bump `autozyte/VERSION` | Semver reflects user-visible change |
+| Update `CHANGELOG.md` | Added section for version |
+| Write `docs/releases/manifest-vX.Y.Z.md` | Summary, verification, upgrade steps |
+| Run tests | `cd autozyte && python -m unittest discover -s tests` |
+| Publish | `./scripts/publish-to-github.sh` from Mac |
+| Verify on GitHub | Tag + manifest visible on BadLabz/autozyte |
 
 ## Access model
 
 | Org | Who | What |
 |-----|-----|------|
 | **BadLabz** | Product collaborators | AutoZyte, Spoiler Saver, FerdAI work |
-| **CTATX** | Training / personal bootcamp | ai-eng-bootcamp, syllabus — separate access |
+| **CTATX** | Training / personal bootcamp | ai-eng-bootcamp — separate access |
 
-Cloud agents need the **Cursor GitHub App** installed on **BadLabz** with read/write on each repo you want agents to push to.
+Cloud agents edit **CTATX/ai-eng-bootcamp**; **you** publish to BadLabz with your `gh` login.
+
+Optional: create a [GitHub Release](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository) from tag `vX.Y.Z` and paste the manifest summary in release notes.
