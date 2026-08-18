@@ -18,6 +18,7 @@ def root():
         "docs": "/docs",
         "estimate": "POST /estimate",
         "ask": "POST /ask",
+        "autozyte": "https://github.com/GTInternational/autozyte",
     }
 
 
