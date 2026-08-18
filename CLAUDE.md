@@ -24,13 +24,11 @@ Do **not** preload full TeamOS v2.0 or this playbook every session. Load playboo
 | Investigation | `Use TeamOS Investigation for [topic]` |
 | Documentation Evaluation | `Use TeamOS Documentation Evaluation for [topic]` |
 
-Agent stubs (GitHub): [CTATX/my-project/.claude/agents/](https://github.com/CTATX/my-project/tree/main/.claude/agents/)
+Agent stubs (GitHub): [GTInternational/Projects](https://github.com/GTInternational/Projects) hub · local [.claude/agents/](.claude/agents/)
 
-Bootcamp agent: [.claude/agents/ai-eng-bootcamp-agent.md](.claude/agents/ai-eng-bootcamp-agent.md) · also in [my-project](https://github.com/CTATX/my-project/blob/main/.claude/agents/ai-eng-bootcamp-agent.md)
+Bootcamp agent: [.claude/agents/ai-eng-bootcamp-agent.md](.claude/agents/ai-eng-bootcamp-agent.md)
 
-Project index entry: [my-project/projects/ai-eng-bootcamp](https://github.com/CTATX/my-project/tree/main/projects/ai-eng-bootcamp)
-
-**TeamOS v2.0 (full — rare):** [my-project/teamOS/v2](https://github.com/CTATX/my-project/tree/main/teamOS/v2)
+Project index: [GTInternational/Projects](https://github.com/GTInternational/Projects) — see `projects/ai-eng-bootcamp`, `projects/autozyte`, `projects/spoiler-saver`
 
 **Engineering TeamOS:** [ai-build-crew/TEAM_OS.md](https://github.com/CTATX/ai-build-crew/blob/main/TEAM_OS.md)
 
@@ -38,9 +36,12 @@ Project index entry: [my-project/projects/ai-eng-bootcamp](https://github.com/CT
 
 | Asset | GitHub |
 |-------|--------|
-| my-project (home hub) | [CTATX/my-project](https://github.com/CTATX/my-project) |
-| badlabz (Product OS assets) | [CTATX/badlabz](https://github.com/CTATX/badlabz) |
+| **GTInternational Projects** (home hub) | [GTInternational/Projects](https://github.com/GTInternational/Projects) |
+| AutoZyte (shop platform) | `GTInternational/autozyte` (target repo) |
+| Spoiler Saver | Indexed in GTInternational/Projects |
+| ai-eng-bootcamp (TAI Labs) | [CTATX/ai-eng-bootcamp](https://github.com/CTATX/ai-eng-bootcamp) |
 | ai-build-crew | [CTATX/ai-build-crew](https://github.com/CTATX/ai-build-crew) |
+| badlabz (Product OS assets) | [CTATX/badlabz](https://github.com/CTATX/badlabz) |
 
 ## Build status
 
