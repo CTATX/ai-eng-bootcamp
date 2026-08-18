@@ -3,6 +3,5 @@ __pycache__/
 *.pyc
 .env
 .streamlit/secrets.toml
-autozyte/.venv/
-autozyte/data/
-data/
+data/*.sqlite3
+data/*.db
