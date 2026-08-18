@@ -3,11 +3,15 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from typing import Any
 
 import requests
 from dotenv import load_dotenv
 
+# Load autozyte/.env even when CLI is run from another cwd
+_AUTOZYTE_ROOT = Path(__file__).resolve().parents[1]
+load_dotenv(_AUTOZYTE_ROOT / ".env")
 load_dotenv()
 
 BASE_URL = "https://api.shopmonkey.cloud/v3"
@@ -99,14 +103,28 @@ def auth_status() -> Any:
 
 
 def list_orders(limit: int = 25, skip: int = 0) -> Any:
+    """List orders — no include[] params (SM v3 expects include as object, not bracket booleans)."""
     return request_json(
         "GET",
         "/order",
         params={
             "limit": limit,
             "skip": skip,
-            "include[customer]": "true",
-            "include[vehicle]": "true",
-            "include[services]": "true",
         },
     )
+
+
+def get_order(order_id: str) -> Any:
+    return request_json("GET", f"/order/{order_id}")
+
+
+def list_order_services(order_id: str) -> list[dict[str, Any]]:
+    payload = request_json("GET", f"/order/{order_id}/service")
+    if isinstance(payload, list):
+        return [row for row in payload if isinstance(row, dict)]
+    return []
+
+
+def get_vehicle(vehicle_id: str) -> dict[str, Any] | None:
+    payload = request_json("GET", f"/vehicle/{vehicle_id}")
+    return payload if isinstance(payload, dict) else None

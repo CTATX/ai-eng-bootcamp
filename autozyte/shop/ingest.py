@@ -7,7 +7,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 from shop.warehouse import connect, initialize
-from shop.shopmonkey_client import ShopmonkeyAPIError, list_orders
+from shop.shopmonkey_client import ShopmonkeyAPIError, get_order, get_vehicle, list_order_services, list_orders
 
 SOURCE = "shopmonkey"
 DEFAULT_PAGE_SIZE = 25
@@ -187,6 +187,39 @@ def _gotcha_rows(order: dict[str, Any], services: list[dict[str, Any]]) -> list[
     return rows
 
 
+def _enrich_order(order: dict[str, Any]) -> dict[str, Any]:
+    """Fetch full order + services + vehicle when list response is sparse."""
+    order_id = str(_pick(order, "id") or "")
+    if not order_id:
+        return order
+
+    if not order.get("services") or not order.get("vehicle"):
+        try:
+            detail = get_order(order_id)
+            if isinstance(detail, dict):
+                order = {**order, **detail}
+        except ShopmonkeyAPIError:
+            pass
+
+    if not order.get("services"):
+        try:
+            services = list_order_services(order_id)
+            if services:
+                order["services"] = services
+        except ShopmonkeyAPIError:
+            pass
+
+    if not order.get("vehicle") and order.get("vehicleId"):
+        try:
+            vehicle = get_vehicle(str(order["vehicleId"]))
+            if vehicle:
+                order["vehicle"] = vehicle
+        except ShopmonkeyAPIError:
+            pass
+
+    return order
+
+
 def upsert_order(connection, order: dict[str, Any]) -> dict[str, int]:
     counts = {"vehicles": 0, "orders": 0, "services": 0, "parts": 0, "gotchas": 0}
     vehicle = _vehicle_row(order)
@@ -326,7 +359,7 @@ def ingest_orders(
 
         with connect() as connection:
             for order in orders:
-                row_counts = upsert_order(connection, order)
+                row_counts = upsert_order(connection, _enrich_order(order))
                 for key in ("vehicles", "orders", "services", "parts", "gotchas"):
                     totals[key] += row_counts[key]
             skip += len(orders)
