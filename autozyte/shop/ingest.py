@@ -7,7 +7,16 @@ from datetime import UTC, datetime
 from typing import Any
 
 from shop.warehouse import connect, initialize
-from shop.shopmonkey_client import ShopmonkeyAPIError, get_order, get_vehicle, list_order_services, list_orders
+from shop.shopmonkey_client import (
+    ShopmonkeyAPIError,
+    find_orders_by_number,
+    get_order,
+    get_vehicle,
+    list_order_services,
+    list_orders,
+    list_vehicle_orders,
+    lookup_vehicle_by_vin,
+)
 
 SOURCE = "shopmonkey"
 DEFAULT_PAGE_SIZE = 25
@@ -188,18 +197,17 @@ def _gotcha_rows(order: dict[str, Any], services: list[dict[str, Any]]) -> list[
 
 
 def _enrich_order(order: dict[str, Any]) -> dict[str, Any]:
-    """Fetch full order + services + vehicle when list response is sparse."""
+    """Fetch full order + services + vehicle — list responses are often sparse."""
     order_id = str(_pick(order, "id") or "")
     if not order_id:
         return order
 
-    if not order.get("services") or not order.get("vehicle"):
-        try:
-            detail = get_order(order_id)
-            if isinstance(detail, dict):
-                order = {**order, **detail}
-        except ShopmonkeyAPIError:
-            pass
+    try:
+        detail = get_order(order_id)
+        if isinstance(detail, dict):
+            order = {**order, **detail}
+    except ShopmonkeyAPIError:
+        pass
 
     if not order.get("services"):
         try:
@@ -209,11 +217,14 @@ def _enrich_order(order: dict[str, Any]) -> dict[str, Any]:
         except ShopmonkeyAPIError:
             pass
 
-    if not order.get("vehicle") and order.get("vehicleId"):
+    vehicle_id = _pick(order, "vehicleId") or _pick(order.get("vehicle"), "id")
+    embedded = order.get("vehicle") if isinstance(order.get("vehicle"), dict) else {}
+    needs_vehicle = not embedded or not _pick(embedded, "vin", "make", "model", "year")
+    if vehicle_id and needs_vehicle:
         try:
-            vehicle = get_vehicle(str(order["vehicleId"]))
+            vehicle = get_vehicle(str(vehicle_id))
             if vehicle:
-                order["vehicle"] = vehicle
+                order["vehicle"] = {**embedded, **vehicle}
         except ShopmonkeyAPIError:
             pass
 
@@ -231,11 +242,20 @@ def upsert_order(connection, order: dict[str, Any]) -> dict[str, int]:
         INSERT INTO vehicles (id, make, model, year, engine, vin, source)
         VALUES (:id, :make, :model, :year, :engine, :vin, :source)
         ON CONFLICT(id) DO UPDATE SET
-            make = excluded.make,
-            model = excluded.model,
-            year = excluded.year,
-            engine = excluded.engine,
-            vin = excluded.vin,
+            make = CASE
+                WHEN excluded.make = 'Unknown' AND vehicles.make != 'Unknown' THEN vehicles.make
+                ELSE excluded.make
+            END,
+            model = CASE
+                WHEN excluded.model = 'Unknown' AND vehicles.model != 'Unknown' THEN vehicles.model
+                ELSE excluded.model
+            END,
+            year = CASE
+                WHEN excluded.year = 0 AND vehicles.year != 0 THEN vehicles.year
+                ELSE excluded.year
+            END,
+            engine = COALESCE(excluded.engine, vehicles.engine),
+            vin = COALESCE(excluded.vin, vehicles.vin),
             source = excluded.source
         """,
         vehicle_payload,
@@ -389,3 +409,136 @@ def ingest_orders(
 
     totals["watermark_skip"] = skip
     return totals
+
+
+def _merge_counts(totals: dict[str, int], row_counts: dict[str, int]) -> None:
+    for key in ("vehicles", "orders", "services", "parts", "gotchas"):
+        totals[key] += row_counts[key]
+
+
+def ingest_one_order(order: dict[str, Any]) -> dict[str, int]:
+    """Enrich and upsert a single ShopMonkey order into the warehouse."""
+    initialize()
+    enriched = _enrich_order(order)
+    with connect() as connection:
+        counts = upsert_order(connection, enriched)
+        _meta_set(connection, "ingest_last_run", datetime.now(UTC).isoformat())
+        _meta_set(connection, "ingest_last_error", "")
+        connection.commit()
+    return counts
+
+
+def ingest_order_by_id(order_id: str) -> dict[str, Any]:
+    """Pull one order by ShopMonkey id (UUID), with full vehicle + services."""
+    order = get_order(order_id)
+    if not isinstance(order, dict):
+        raise ShopmonkeyAPIError(404, f"No order found for id {order_id}")
+    counts = ingest_one_order(order)
+    vehicle_id = _pick(order, "vehicleId") or _pick(order.get("vehicle"), "id")
+    return {"order_id": str(_pick(order, "id")), "vehicle_id": vehicle_id, **counts}
+
+
+def ingest_order_by_ticket(ticket_number: str | int, *, pull_vehicle_history: bool = True) -> dict[str, Any]:
+    """Pull the work order matching a ShopMonkey ticket / RO number."""
+    matches = find_orders_by_number(ticket_number)
+    if not matches:
+        raise ShopmonkeyAPIError(
+            404,
+            f"No order found with ticket number {ticket_number!r}. "
+            "Use the RO # from ShopMonkey (numbers only, no #).",
+        )
+
+    order = matches[0]
+    counts = ingest_one_order(order)
+    vehicle_id = _pick(order, "vehicleId") or _pick(order.get("vehicle"), "id")
+    result: dict[str, Any] = {
+        "ticket": str(ticket_number).strip().lstrip("#"),
+        "order_id": str(_pick(order, "id")),
+        "vehicle_id": vehicle_id,
+        "matches": len(matches),
+        **counts,
+    }
+
+    if pull_vehicle_history and vehicle_id:
+        history = ingest_vehicle_orders(str(vehicle_id))
+        result["vehicle_history"] = history
+
+    with connect() as connection:
+        vin_row = connection.execute(
+            "SELECT vin, make, model, year FROM vehicles WHERE id = ?",
+            (str(vehicle_id),),
+        ).fetchone()
+    if vin_row:
+        result["vin"] = vin_row["vin"]
+        result["vehicle"] = {
+            "make": vin_row["make"],
+            "model": vin_row["model"],
+            "year": vin_row["year"],
+        }
+
+    return result
+
+
+def ingest_vehicle_orders(vehicle_id: str, *, page_size: int = 50, max_pages: int = 20) -> dict[str, int]:
+    """Pull all known orders for a vehicle id into the warehouse."""
+    initialize()
+    totals = {"pages": 0, "orders": 0, "vehicles": 0, "services": 0, "parts": 0, "gotchas": 0}
+    skip = 0
+    for _ in range(max_pages):
+        batch = list_vehicle_orders(vehicle_id, limit=page_size, skip=skip)
+        if not batch:
+            break
+        with connect() as connection:
+            for order in batch:
+                _merge_counts(totals, upsert_order(connection, _enrich_order(order)))
+            connection.commit()
+        totals["pages"] += 1
+        skip += len(batch)
+        if len(batch) < page_size:
+            break
+    return totals
+
+
+def ensure_vehicle_for_vin(vin: str) -> bool:
+    """Backfill warehouse from ShopMonkey when VIN is missing locally."""
+    vin = vin.strip()
+    if not vin:
+        return False
+
+    initialize()
+    with connect() as connection:
+        row = connection.execute(
+            "SELECT id FROM vehicles WHERE vin = ? COLLATE NOCASE",
+            (vin,),
+        ).fetchone()
+        if row:
+            return True
+
+    vehicle = lookup_vehicle_by_vin(vin)
+    if vehicle and vehicle.get("id"):
+        ingest_vehicle_orders(str(vehicle["id"]))
+        return True
+
+    # Fallback: scan recent orders for matching embedded vehicle VIN.
+    skip = 0
+    page_size = 50
+    for _ in range(10):
+        payload = list_orders(limit=page_size, skip=skip)
+        orders = _normalize_orders(payload)
+        if not orders:
+            break
+        for order in orders:
+            enriched = _enrich_order(order)
+            embedded = enriched.get("vehicle") if isinstance(enriched.get("vehicle"), dict) else {}
+            order_vin = _pick(embedded, "vin")
+            if order_vin and str(order_vin).upper() == vin.upper():
+                ingest_one_order(enriched)
+                vehicle_id = _pick(enriched, "vehicleId") or _pick(embedded, "id")
+                if vehicle_id:
+                    ingest_vehicle_orders(str(vehicle_id))
+                return True
+        skip += len(orders)
+        if len(orders) < page_size:
+            break
+
+    return False

@@ -7,7 +7,13 @@ import json
 import sys
 
 from ferdai.hypothesis import build_hypothesis
-from shop.ingest import ingest_orders, ingest_status
+from shop.ingest import (
+    ensure_vehicle_for_vin,
+    ingest_order_by_id,
+    ingest_order_by_ticket,
+    ingest_orders,
+    ingest_status,
+)
 from shop.service import status as warehouse_status
 from shop.synthetic import seed_if_empty
 from shop.shopmonkey_client import ShopmonkeyAPIError, api_key_configured, auth_status
@@ -49,8 +55,39 @@ def cmd_ingest(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_ingest_ticket(args: argparse.Namespace) -> int:
+    if not api_key_configured():
+        print("SHOPMONKEY_API_KEY missing. Add it to .env.", file=sys.stderr)
+        return 1
+    try:
+        result = ingest_order_by_ticket(
+            args.ticket,
+            pull_vehicle_history=not args.no_history,
+        )
+    except ShopmonkeyAPIError as exc:
+        print(f"ShopMonkey error {exc.status_code}: {exc.message}", file=sys.stderr)
+        return 1
+    _print_json(result)
+    return 0
+
+
+def cmd_ingest_order(args: argparse.Namespace) -> int:
+    if not api_key_configured():
+        print("SHOPMONKEY_API_KEY missing. Add it to .env.", file=sys.stderr)
+        return 1
+    try:
+        result = ingest_order_by_id(args.order_id)
+    except ShopmonkeyAPIError as exc:
+        print(f"ShopMonkey error {exc.status_code}: {exc.message}", file=sys.stderr)
+        return 1
+    _print_json(result)
+    return 0
+
+
 def cmd_hypothesis(args: argparse.Namespace) -> int:
     seed_if_empty()
+    if args.vin and api_key_configured():
+        ensure_vehicle_for_vin(args.vin.strip())
     payload = build_hypothesis(
         vin=args.vin,
         year=args.year,
@@ -90,6 +127,22 @@ def build_parser() -> argparse.ArgumentParser:
     ingest_parser.add_argument("--page-size", type=int, default=25)
     ingest_parser.add_argument("--max-pages", type=int, default=None)
     ingest_parser.set_defaults(func=cmd_ingest)
+
+    ticket_parser = sub.add_parser(
+        "ingest-ticket",
+        help="Pull one ShopMonkey RO by ticket number (then that vehicle's history)",
+    )
+    ticket_parser.add_argument("ticket", help="RO / ticket number from ShopMonkey (e.g. 1042)")
+    ticket_parser.add_argument(
+        "--no-history",
+        action="store_true",
+        help="Only ingest this ticket, not other orders for the same vehicle",
+    )
+    ticket_parser.set_defaults(func=cmd_ingest_ticket)
+
+    order_parser = sub.add_parser("ingest-order", help="Pull one ShopMonkey order by API id (UUID)")
+    order_parser.add_argument("order_id", help="ShopMonkey order id")
+    order_parser.set_defaults(func=cmd_ingest_order)
 
     hyp_parser = sub.add_parser("hypothesis", help="Jake data-based hypothesis (no LLM)")
     hyp_parser.add_argument("--vin", default=None)

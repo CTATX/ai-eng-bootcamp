@@ -36,6 +36,7 @@ chmod +x start.sh
 python -m shop.cli status
 python -m shop.cli hypothesis --vin SYNWP020140002 --complaint "AOS" --compact
 python -m shop.cli ingest --max-pages 5   # requires SHOPMONKEY_API_KEY
+python -m shop.cli ingest-ticket 1042     # pull one RO + that car's history
 ```
 
 ## Docs

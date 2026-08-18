@@ -4,7 +4,7 @@ from fastapi import FastAPI, HTTPException
 
 from ferdai.hypothesis import build_hypothesis
 from server.schemas import HypothesisRequest
-from shop.ingest import ingest_orders, ingest_status
+from shop.ingest import ensure_vehicle_for_vin, ingest_orders, ingest_status
 from shop.service import (
     comeback_count,
     gotchas,
@@ -15,7 +15,11 @@ from shop.service import (
     status as shop_status,
     ticket_trend,
 )
-from shop.shopmonkey_client import ShopmonkeyAPIError, ShopmonkeyConfigError
+from shop.shopmonkey_client import (
+    ShopmonkeyAPIError,
+    ShopmonkeyConfigError,
+    api_key_configured,
+)
 from shop.synthetic import seed_if_empty
 
 app = FastAPI(title="AutoZyte API")
@@ -82,6 +86,8 @@ def advisor_hypothesis(body: HypothesisRequest):
             status_code=422,
             detail="Provide VIN or year + make + model.",
         )
+    if body.vin and api_key_configured():
+        ensure_vehicle_for_vin(body.vin.strip())
     return build_hypothesis(
         vin=body.vin,
         year=body.year,

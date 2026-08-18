@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 from pathlib import Path
 from typing import Any
@@ -102,16 +103,48 @@ def auth_status() -> Any:
     return request_json("GET", "/auth/api_key/status")
 
 
-def list_orders(limit: int = 25, skip: int = 0) -> Any:
-    """List orders — no include[] params (SM v3 expects include as object, not bracket booleans)."""
-    return request_json(
-        "GET",
-        "/order",
-        params={
-            "limit": limit,
-            "skip": skip,
-        },
-    )
+def list_orders(
+    limit: int = 25,
+    skip: int = 0,
+    *,
+    where: dict[str, Any] | None = None,
+    orderby: str | None = None,
+) -> Any:
+    """List orders. Optional `where` is JSON-encoded per ShopMonkey v3 (e.g. {"number": 1234})."""
+    params: dict[str, Any] = {"limit": limit, "skip": skip}
+    if where:
+        params["where"] = json.dumps(where)
+    if orderby:
+        params["orderby"] = orderby
+    return request_json("GET", "/order", params=params)
+
+
+def find_orders_by_number(ticket_number: str | int) -> list[dict[str, Any]]:
+    """Find work orders by ShopMonkey ticket number (RO #)."""
+    raw = str(ticket_number).strip().lstrip("#")
+    if not raw:
+        return []
+
+    candidates: list[Any] = [raw]
+    if raw.isdigit():
+        candidates.extend([int(raw), str(int(raw))])
+
+    seen: set[str] = set()
+    matches: list[dict[str, Any]] = []
+    for candidate in candidates:
+        payload = list_orders(limit=10, where={"number": candidate})
+        rows = payload if isinstance(payload, list) else []
+        if isinstance(payload, dict) and isinstance(payload.get("data"), list):
+            rows = payload["data"]
+        for row in rows:
+            if isinstance(row, dict):
+                order_id = str(row.get("id") or "")
+                if order_id and order_id not in seen:
+                    seen.add(order_id)
+                    matches.append(row)
+        if matches:
+            break
+    return matches
 
 
 def get_order(order_id: str) -> Any:
@@ -128,3 +161,28 @@ def list_order_services(order_id: str) -> list[dict[str, Any]]:
 def get_vehicle(vehicle_id: str) -> dict[str, Any] | None:
     payload = request_json("GET", f"/vehicle/{vehicle_id}")
     return payload if isinstance(payload, dict) else None
+
+
+def lookup_vehicle_by_vin(vin: str) -> dict[str, Any] | None:
+    """Shop record for VIN when present; may return validation-only payload."""
+    payload = request_json("GET", f"/vehicle/vin/{vin.strip()}")
+    if isinstance(payload, dict) and payload.get("id"):
+        return payload
+    return None
+
+
+def list_vehicle_orders(
+    vehicle_id: str,
+    *,
+    limit: int = 50,
+    skip: int = 0,
+) -> list[dict[str, Any]]:
+    """All service orders linked to a vehicle."""
+    payload = request_json(
+        "GET",
+        f"/vehicle/{vehicle_id}/order",
+        params={"limit": limit, "skip": skip},
+    )
+    if isinstance(payload, list):
+        return [row for row in payload if isinstance(row, dict)]
+    return []
