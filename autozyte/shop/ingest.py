@@ -6,8 +6,8 @@ import time
 from datetime import UTC, datetime
 from typing import Any
 
-from server.shop_warehouse import connect, initialize
-from server.shopmonkey_client import ShopmonkeyAPIError, list_orders
+from shop.warehouse import connect, initialize
+from shop.shopmonkey_client import ShopmonkeyAPIError, list_orders
 
 SOURCE = "shopmonkey"
 DEFAULT_PAGE_SIZE = 25

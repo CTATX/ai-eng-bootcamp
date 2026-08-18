@@ -6,9 +6,9 @@ import os
 import tempfile
 import unittest
 
-from server.shop_service import job_artifacts, parts_catalog, status, ticket_trend
-from server.shop_synthetic import ORDER_COUNT, VEHICLE_COUNT, seed_if_empty
-from server.shop_warehouse import connect
+from shop.service import job_artifacts, parts_catalog, status, ticket_trend
+from shop.synthetic import ORDER_COUNT, VEHICLE_COUNT, seed_if_empty
+from shop.warehouse import connect
 
 _TMP = tempfile.TemporaryDirectory()
 _DB_PATH = os.path.join(_TMP.name, "synthetic.sqlite3")

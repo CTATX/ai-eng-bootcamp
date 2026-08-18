@@ -6,8 +6,8 @@ import os
 import tempfile
 import unittest
 
-from server.shop_ingest import upsert_order
-from server.shop_warehouse import connect, initialize
+from shop.ingest import upsert_order
+from shop.warehouse import connect, initialize
 
 _TMP = tempfile.TemporaryDirectory()
 _DB_PATH = os.path.join(_TMP.name, "ingest.sqlite3")

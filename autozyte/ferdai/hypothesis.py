@@ -7,8 +7,8 @@ import statistics
 from datetime import UTC, datetime
 from typing import Any
 
-from server.shop_synthetic import seed_if_empty
-from server.shop_warehouse import connect
+from shop.synthetic import seed_if_empty
+from shop.warehouse import connect
 
 COMEBACK_DAYS = 30
 MIN_N_FOR_INFERENCE = 1

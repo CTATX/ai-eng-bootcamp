@@ -48,19 +48,12 @@ Project index: [GTInternational/Projects](https://github.com/GTInternational/Pro
 | Piece | Status |
 |-------|--------|
 | `GET /health`, `POST /ask`, `POST /estimate` | Done |
-| Streamlit → API (both pages) | Done |
-| Shop intelligence | **P0 plan** + **P1 synthetic Porsche warehouse/screens** |
-| Docker + deploy | Next (syllabus) |
+| Streamlit → API (Cost Estimator + Q&A) | Done |
+| **AutoZyte** (shop, FerdAI, ZyteShelf, Zyren) | **`autozyte/`** → [GTInternational/autozyte](https://github.com/GTInternational/autozyte) |
+| Docker + deploy (bootcamp API) | Next (syllabus) |
 
-Use sidebar: **Cost Estimator** | **Bootcamp Q&A** | **Shop intelligence**
+Use sidebar: **Cost Estimator** | **Bootcamp Q&A**
 
-JTBD / requirements (running, rough cut): `docs/shop-intelligence-jtbd.md`  
-Published paths + screenshots: `docs/experiences.md`
+AutoZyte: `cd autozyte && ./start.sh` · see [`docs/autozyte-split.md`](docs/autozyte-split.md)
 
-### Every session — one command (recommended)
-
-```bash
-./start.sh
-```
-
-Starts API + Streamlit. **Ctrl+C** stops both. See playbook §4.
+Playbook: `docs/ai-eng-bootcamp-playbook.md`

@@ -5,7 +5,7 @@ from __future__ import annotations
 import random
 from datetime import date, timedelta
 
-from server.shop_warehouse import connect, initialize
+from shop.warehouse import connect, initialize
 
 SEED = 1980
 SOURCE = "synthetic"

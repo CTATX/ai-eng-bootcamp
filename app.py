@@ -11,14 +11,12 @@ Welcome. Use the **sidebar on the left** to switch apps:
 
 1. **Cost Estimator** — model cost math (`POST /estimate`)
 2. **Bootcamp Q&A** — ask questions (`POST /ask`)
-3. **Shop intelligence** — synthetic Porsche warehouse (no ShopMonkey key)
-4. **Jake Advisor** — data-based hypothesis from shop history (no LLM)
 
-Both need the API server running in another terminal:
+Shop production code lives in **[AutoZyte](https://github.com/GTInternational/autozyte)** (GTInternational).
+
+Start the API:
 """
 )
-st.code("uvicorn server.main:app --reload", language="bash")
+st.code("./start.sh", language="bash")
 
-st.info(
-    "Use the sidebar for **Cost Estimator**, **Bootcamp Q&A**, **Shop intelligence**, or **Jake Advisor**."
-)
+st.info("Use the sidebar for **Cost Estimator** or **Bootcamp Q&A**.")

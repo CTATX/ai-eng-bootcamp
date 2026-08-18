@@ -1,4 +1,4 @@
-"""CLI for Jake shop intelligence — status, ingest, hypothesis."""
+"""CLI for AutoZyte shop — status, ingest, hypothesis."""
 
 from __future__ import annotations
 
@@ -6,11 +6,11 @@ import argparse
 import json
 import sys
 
-from server.shop_hypothesis import build_hypothesis
-from server.shop_ingest import ingest_orders, ingest_status
-from server.shop_service import status as warehouse_status
-from server.shop_synthetic import seed_if_empty
-from server.shopmonkey_client import ShopmonkeyAPIError, api_key_configured, auth_status
+from ferdai.hypothesis import build_hypothesis
+from shop.ingest import ingest_orders, ingest_status
+from shop.service import status as warehouse_status
+from shop.synthetic import seed_if_empty
+from shop.shopmonkey_client import ShopmonkeyAPIError, api_key_configured, auth_status
 
 
 def _print_json(payload: object) -> None:
@@ -79,7 +79,7 @@ def cmd_hypothesis(args: argparse.Namespace) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Jake shop intelligence CLI — synthetic warehouse now, ShopMonkey when keyed."
+        description="AutoZyte shop CLI — synthetic warehouse now, ShopMonkey when keyed."
     )
     sub = parser.add_subparsers(dest="command", required=True)
 

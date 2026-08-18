@@ -23,7 +23,7 @@ def post_hypothesis(payload: dict) -> dict:
 
 st.title("Jake — service advisor")
 st.caption(
-    "Data-based hypothesis from **your** shop warehouse. FACT / INFERRED / UNKNOWN — no silent fill. "
+    "AutoZyte · Powered by FerdAI · FACT / INFERRED / UNKNOWN — no silent fill. "
     "Synthetic Porsche works without a ShopMonkey key."
 )
 

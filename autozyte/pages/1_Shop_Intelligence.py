@@ -16,7 +16,7 @@ def load_shop(path: str):
     return response.json()
 
 
-st.title("Shop intelligence")
+st.title("AutoZyte — shop intelligence")
 st.caption(
     "Synthetic Porsche prototype (1980–2025). No ShopMonkey key. "
     "Not live Pelican or WorldPac inventory. Not a ShopMonkey reskin."

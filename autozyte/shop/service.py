@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from typing import Any
 
-from server.shop_synthetic import seed_if_empty
-from server.shop_warehouse import connect
-from server.shopmonkey_client import api_key_configured
+from shop.synthetic import seed_if_empty
+from shop.warehouse import connect
+from shop.shopmonkey_client import api_key_configured
 
 
 def _rows(sql: str, params: tuple = ()) -> list[dict[str, Any]]:

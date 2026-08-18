@@ -6,9 +6,9 @@ import os
 import tempfile
 import unittest
 
-from server.shop_hypothesis import build_hypothesis
-from server.shop_synthetic import seed_if_empty
-from server.shop_warehouse import connect
+from ferdai.hypothesis import build_hypothesis
+from shop.synthetic import seed_if_empty
+from shop.warehouse import connect
 
 _TMP = tempfile.TemporaryDirectory()
 _DB_PATH = os.path.join(_TMP.name, "hypothesis.sqlite3")
