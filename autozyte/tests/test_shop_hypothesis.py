@@ -37,17 +37,22 @@ class HypothesisTests(unittest.TestCase):
 
     def test_complaint_boosts_matching_reason(self) -> None:
         packet = build_hypothesis(vin="SYNWP020240053", complaint="AOS oil separator")
-        reasons = [row["label"] for row in packet["common_reasons"]]
-        self.assertIn("AOS / oil separator", reasons)
-        self.assertIn("AOS", reasons[0])
         self.assertEqual(packet["likelihood"]["selected_reason"], "AOS / oil separator")
+        self.assertTrue(packet["guardrail"]["complaint_matched"])
 
     def test_aos_complaint_without_history_is_unknown_not_ac(self) -> None:
         packet = build_hypothesis(vin="SYNWP020140002", complaint="AOS oil separator")
         self.assertEqual(packet["likelihood"]["tag"], "UNKNOWN")
-        self.assertNotEqual(packet["likelihood"]["selected_reason"], "A/C service")
-        concepts = packet["complaint_interpretation"]["concepts"]
-        self.assertTrue(any(c["id"] == "aos" for c in concepts))
+        self.assertIsNone(packet["likelihood"]["selected_reason"])
+        self.assertFalse(packet["guardrail"]["complaint_matched"])
+        self.assertTrue(packet["guardrail"]["no_invented_match"])
+        self.assertGreater(len(packet["clarify"]), 0)
+        self.assertEqual(packet["parts"], [])
+
+    def test_no_complaint_does_not_invent_likelihood(self) -> None:
+        packet = build_hypothesis(vin="SYNWP020140002")
+        self.assertIsNone(packet["likelihood"]["selected_reason"])
+        self.assertEqual(packet["likelihood"]["tag"], "UNKNOWN")
 
     def test_orchestrator_slots_are_unknown(self) -> None:
         packet = build_hypothesis(vin="SYNWP020140002")

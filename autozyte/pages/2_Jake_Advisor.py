@@ -98,6 +98,13 @@ st.caption(
 )
 
 likelihood = packet["likelihood"]
+guard = packet.get("guardrail") or {}
+if guard.get("no_invented_match") and not guard.get("complaint_matched") and (interp.get("raw") or "").strip():
+    st.error(
+        "**Hard guardrail:** No shop-history match for this complaint. "
+        "Do not quote unrelated past visits as today's diagnosis."
+    )
+
 st.subheader("Likelihood")
 interp = packet.get("complaint_interpretation") or {}
 if interp.get("concepts"):
@@ -110,6 +117,12 @@ if likelihood.get("selected_reason"):
     c2.metric("Share", f"{likelihood.get('percent', '—')}%")
     c3.metric("n", likelihood.get("n", "—"))
     st.caption(f"Best: {likelihood.get('best_case')} · Worst: {likelihood.get('worst_case')}")
+
+if packet.get("clarify"):
+    st.subheader("Clarify with customer")
+    st.caption("Similar or past visits on file — **not** today's diagnosis until confirmed.")
+    for row in packet["clarify"]:
+        st.markdown(f"- :orange[CLARIFY] {row['prompt']}")
 
 left, right = st.columns(2)
 with left:
@@ -134,7 +147,8 @@ with right:
     else:
         st.warning("No labor hours recorded for this match.")
 
-st.subheader("Common reasons")
+st.subheader("Past visits on file")
+st.caption("FACT counts from warehouse — only the matched job (if any) applies to today's complaint.")
 if packet["common_reasons"]:
     reasons_df = pd.DataFrame(packet["common_reasons"])
     st.dataframe(
@@ -146,7 +160,7 @@ if packet["common_reasons"]:
 else:
     st.warning("No service reasons in warehouse for this vehicle.")
 
-st.subheader("Parts (for top reason)")
+st.subheader("Parts (matched job only)")
 if packet["parts"]:
     parts_df = pd.DataFrame(packet["parts"])
     st.dataframe(

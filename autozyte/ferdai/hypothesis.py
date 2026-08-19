@@ -8,11 +8,9 @@ from datetime import UTC, datetime
 from typing import Any
 
 from ferdai.shop_vocabulary import (
-    _complaint_tokens,
-    best_complaint_reason_match,
     complaint_interpretation,
     detect_complaint_concepts,
-    score_reason_for_concepts,
+    resolve_complaint_match,
 )
 from shop.synthetic import seed_if_empty
 from shop.warehouse import connect
@@ -174,7 +172,7 @@ def build_hypothesis(
             ).fetchall()
         ]
 
-    tokens = _complaint_tokens(complaint)
+    tokens_present = bool(complaint and complaint.strip())
     concepts = detect_complaint_concepts(complaint)
     reason_counts: dict[str, dict[str, Any]] = {}
     for service in services:
@@ -184,22 +182,23 @@ def build_hypothesis(
             {"label": label, "order_ids": set(), "tag": "FACT", "source": "order_service_name"},
         )
         bucket["order_ids"].add(service["order_id"])
-        concept_score, concept_notes = score_reason_for_concepts(label, concepts)
-        if concept_score > 0:
-            bucket["boost"] = bucket.get("boost", 0) + concept_score
-            bucket["concept_notes"] = concept_notes
-        elif tokens and any(token in label.lower() for token in tokens):
-            bucket["boost"] = bucket.get("boost", 0) + 1
+
+    reason_labels = list(reason_counts.keys())
+    complaint_match = resolve_complaint_match(complaint, reason_labels)
+    selected_reason = complaint_match.reason if complaint_match.matched else None
+    complaint_match_notes = complaint_match.notes
+    clarify = complaint_match.clarify
 
     ranked_reasons = sorted(
         reason_counts.values(),
-        key=lambda row: (row.get("boost", 0), len(row["order_ids"])),
+        key=lambda row: len(row["order_ids"]),
         reverse=True,
     )
     total_services = len(services) or 1
     common_reasons = []
     for row in ranked_reasons[:8]:
         count = len(row["order_ids"])
+        applies = selected_reason == row["label"] if tokens_present else None
         common_reasons.append(
             {
                 "label": row["label"],
@@ -208,34 +207,25 @@ def build_hypothesis(
                 "source": row["source"],
                 "tag": "FACT",
                 "example_order_ids": sorted(row["order_ids"])[:5],
+                "applies_to_complaint": applies,
             }
         )
 
-    selected_reason = common_reasons[0]["label"] if common_reasons else None
-    complaint_match_notes: list[str] = []
-    if concepts:
-        concept_pick, concept_score, complaint_match_notes = best_complaint_reason_match(
-            list(reason_counts.keys()),
-            concepts,
+    if tokens_present and not complaint_match.matched:
+        not_in_data.append(
+            {
+                "topic": "Complaint vs shop history",
+                "why": (
+                    "No honest match between customer complaint and a job name on file. "
+                    "Jake must clarify — unrelated past visits are not today's diagnosis."
+                ),
+            }
         )
-        if concept_pick:
-            selected_reason = concept_pick
-        else:
-            selected_reason = None
-            not_in_data.append(
-                {
-                    "topic": "Complaint vs shop history",
-                    "why": (
-                        f"Customer mention maps to {', '.join(c.canonical for c in concepts)} "
-                        "but no matching service name in this vehicle's warehouse orders."
-                    ),
-                }
-            )
 
-    selected_order_ids = (
+    selected_order_ids: set[str] = (
         set(reason_counts[selected_reason]["order_ids"])
         if selected_reason and selected_reason in reason_counts
-        else set(order_ids)
+        else set()
     )
 
     part_stats: dict[str, dict[str, Any]] = {}
@@ -267,8 +257,16 @@ def build_hypothesis(
         bucket["avg_part_cost_usd"] = round(statistics.mean(costs), 2) if costs else None
         parts_out.append(bucket)
 
-    ticket_amounts = [float(o["total_usd"]) for o in orders if o["total_usd"] is not None]
-    hours_with = [float(o["labor_hours"]) for o in orders if o["labor_hours"] is not None]
+    ticket_amounts = (
+        [float(o["total_usd"]) for o in orders if o["total_usd"] is not None and o["id"] in selected_order_ids]
+        if selected_order_ids
+        else []
+    )
+    hours_with = (
+        [float(o["labor_hours"]) for o in orders if o["labor_hours"] is not None and o["id"] in selected_order_ids]
+        if selected_order_ids
+        else []
+    )
     hours_missing = len(orders) - len(hours_with)
 
     dates = [o["opened_at"][:10] for o in orders if o["opened_at"]]
@@ -295,21 +293,27 @@ def build_hypothesis(
         round(100 * len(selected_order_ids) / n, 1) if selected_reason and n else None
     )
 
-    if concepts and not selected_reason:
-        concept_names = ", ".join(c.canonical for c in concepts)
+    if tokens_present and not complaint_match.matched:
+        concept_names = ", ".join(c.canonical for c in concepts) if concepts else "complaint terms"
         likelihood_statement = (
-            f"Complaint maps to {concept_names} — no matching job name in shop history; "
-            "not guessing from unrelated visits (A/C and AOS are different)."
+            f"No shop-history match for {concept_names}. "
+            "Do not quote unrelated past visits as today's issue — ask customer to clarify."
+        )
+        likelihood_tag = "UNKNOWN"
+    elif not tokens_present:
+        likelihood_statement = (
+            "No customer complaint provided — past visits listed as FACT only; "
+            "not inferring why they are here today."
         )
         likelihood_tag = "UNKNOWN"
     elif selected_reason and likelihood_pct is not None:
         likelihood_statement = (
-            f"Based on {n} shop orders, {likelihood_pct}% share for '{selected_reason}' "
-            f"(shop history match — not a manufacturer diagnosis)."
+            f"Matched job '{selected_reason}' on {likelihood_n} of {n} orders for this vehicle "
+            "(shop history — not a manufacturer diagnosis)."
         )
         likelihood_tag = "INFERRED" if likelihood_n >= MIN_N_FOR_INFERENCE else "UNKNOWN"
     else:
-        likelihood_statement = f"Only {n} order(s) — insufficient for a strong likelihood call."
+        likelihood_statement = "Insufficient matched history for this complaint."
         likelihood_tag = "UNKNOWN"
 
     not_in_data.extend(
@@ -348,12 +352,23 @@ def build_hypothesis(
         )
 
     recommendations = []
-    if selected_reason and likelihood_n >= MIN_N_FOR_INFERENCE:
+    if complaint_match.matched and selected_reason and likelihood_n >= MIN_N_FOR_INFERENCE:
         recommendations.append(
             {
-                "action": f"Lead with shop history: {selected_reason}",
-                "because": f"Seen on {len(selected_order_ids)} of {n} orders for this vehicle identity.",
-                "tag": "INFERRED" if n < 5 else "FACT",
+                "action": f"Shop history match: {selected_reason}",
+                "because": f"Job name on file matches complaint ({len(selected_order_ids)} order(s)).",
+                "tag": "FACT" if likelihood_n >= 2 else "INFERRED",
+            }
+        )
+    elif tokens_present and not complaint_match.matched and clarify:
+        recommendations.append(
+            {
+                "action": "Clarify with customer before quoting scope or ETA",
+                "because": (
+                    "Complaint did not match any job name on file. Similar or past visits listed below — "
+                    "confirm with customer; never assume."
+                ),
+                "tag": "CLARIFY",
             }
         )
     if gotcha_out:
@@ -393,7 +408,11 @@ def build_hypothesis(
             "typical_usd": round(statistics.median(ticket_amounts), 2) if ticket_amounts else None,
             "best_observed_usd": _percentile(ticket_amounts, 0.25),
             "worst_observed_usd": _percentile(ticket_amounts, 0.75),
-            "method": "Observed shop invoices for matched vehicle(s)",
+            "method": (
+                f"Observed invoices for matched job '{selected_reason}'"
+                if selected_reason
+                else "No matched job — ticket stats withheld (not inventing from other visits)"
+            ),
             "tag": "FACT" if len(ticket_amounts) >= 5 else ("INFERRED" if ticket_amounts else "UNKNOWN"),
         },
         "time": {
@@ -402,9 +421,17 @@ def build_hypothesis(
             "typical_hours": round(statistics.median(hours_with), 1) if hours_with else None,
             "tag": "FACT" if len(hours_with) >= 5 else ("INFERRED" if hours_with else "UNKNOWN"),
             "note": (
-                f"Based on {len(hours_with)} orders with labor_hours recorded."
-                if hours_with
-                else "No labor hours in warehouse for this match."
+                f"Based on {len(hours_with)} matched order(s) with labor_hours recorded."
+                if hours_with and selected_reason
+                else (
+                    "No labor hours for matched complaint — stats withheld."
+                    if tokens_present and not complaint_match.matched
+                    else (
+                        f"Based on {len(hours_with)} orders with labor_hours recorded."
+                        if hours_with
+                        else "No labor hours in warehouse for this match."
+                    )
+                )
             ),
         },
         "gotchas": gotcha_out,
@@ -426,6 +453,13 @@ def build_hypothesis(
             "statement": likelihood_statement,
         },
         "complaint_interpretation": complaint_interpretation(complaint),
+        "complaint_match": {
+            "matched": complaint_match.matched,
+            "reason": selected_reason,
+            "score": complaint_match.score,
+            "tag": "FACT" if complaint_match.matched else "UNKNOWN",
+        },
+        "clarify": clarify,
         "complaint_match_notes": complaint_match_notes,
         "recommendations": recommendations,
         "not_in_data": not_in_data,
@@ -437,6 +471,12 @@ def build_hypothesis(
         },
         "guardrail": {
             "no_fill": True,
+            "no_invented_match": True,
+            "complaint_matched": complaint_match.matched,
+            "rule": (
+                "If complaint does not match a job name on file, do not invent a diagnosis "
+                "from unrelated visits. Use CLARIFY prompts only."
+            ),
             "human_gate": "Jake must approve before customer hears ETA or scope.",
         },
     }
@@ -502,6 +542,9 @@ def _empty_packet(
         },
         "guardrail": {
             "no_fill": True,
+            "no_invented_match": True,
+            "complaint_matched": False,
+            "rule": "If complaint does not match a job name on file, do not invent a diagnosis.",
             "human_gate": "Jake must approve before customer hears ETA or scope.",
         },
     }

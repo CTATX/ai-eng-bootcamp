@@ -7,6 +7,7 @@ import unittest
 from ferdai.shop_vocabulary import (
     best_complaint_reason_match,
     detect_complaint_concepts,
+    resolve_complaint_match,
     score_reason_for_concepts,
 )
 
@@ -46,3 +47,12 @@ class ShopVocabularyTests(unittest.TestCase):
         )
         self.assertIsNone(label)
         self.assertLessEqual(score, 0)
+
+    def test_resolve_never_invents_when_no_match(self) -> None:
+        result = resolve_complaint_match(
+            "AOS oil separator",
+            ["A/C service", "Brake service"],
+        )
+        self.assertFalse(result.matched)
+        self.assertIsNone(result.reason)
+        self.assertTrue(result.clarify)

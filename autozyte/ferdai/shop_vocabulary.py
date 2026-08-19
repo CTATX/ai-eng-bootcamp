@@ -6,7 +6,7 @@ FACT: these are shop-standard term definitions, not diagnoses.
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 # Each concept: canonical label, search aliases, and labels that must NOT match.
@@ -163,6 +163,108 @@ def best_complaint_reason_match(
     if best_score <= 0:
         return None, best_score, all_notes
     return best_label, best_score, all_notes
+
+
+@dataclass(frozen=True)
+class ComplaintMatchResult:
+    """Outcome of matching customer complaint to warehouse service names."""
+
+    matched: bool
+    reason: str | None
+    score: int
+    notes: list[str] = field(default_factory=list)
+    clarify: list[dict[str, Any]] = field(default_factory=list)
+
+
+def _clarify_other_visits(reason_labels: list[str], *, overlap_tokens: list[str] | None = None) -> list[dict[str, Any]]:
+    """Past or weakly similar jobs — advisor must clarify; never auto-diagnose."""
+    items: list[dict[str, Any]] = []
+    for label in reason_labels:
+        hits = [t for t in (overlap_tokens or []) if t in label.lower()]
+        if overlap_tokens and hits:
+            prompt = (
+                f"Similar wording only ({', '.join(hits)}) — please clarify with customer; "
+                f"not confirmed as '{label}'."
+            )
+        else:
+            prompt = (
+                f"Past visit on file: '{label}' — not matched to this complaint; "
+                "ask customer if related."
+            )
+        items.append({"label": label, "tag": "CLARIFY", "prompt": prompt})
+    return items[:6]
+
+
+def resolve_complaint_match(
+    complaint: str | None,
+    reason_labels: list[str],
+) -> ComplaintMatchResult:
+    """Hard match gate — no invented diagnosis when score is insufficient."""
+    if not complaint or not complaint.strip():
+        return ComplaintMatchResult(matched=False, reason=None, score=0)
+
+    if not reason_labels:
+        return ComplaintMatchResult(
+            matched=False,
+            reason=None,
+            score=0,
+            notes=["No service names in warehouse for this vehicle."],
+        )
+
+    concepts = detect_complaint_concepts(complaint)
+    if concepts:
+        pick, score, notes = best_complaint_reason_match(reason_labels, concepts)
+        if pick and score > 0:
+            return ComplaintMatchResult(matched=True, reason=pick, score=score, notes=notes)
+        return ComplaintMatchResult(
+            matched=False,
+            reason=None,
+            score=score,
+            notes=notes,
+            clarify=_clarify_other_visits(reason_labels),
+        )
+
+    tokens = [t for t in _complaint_tokens(complaint) if len(t) > 2]
+    if not tokens:
+        return ComplaintMatchResult(
+            matched=False,
+            reason=None,
+            score=0,
+            notes=["Complaint has no mappable shop terms."],
+            clarify=_clarify_other_visits(reason_labels),
+        )
+
+    best_label: str | None = None
+    best_hits: list[str] = []
+    for label in reason_labels:
+        hits = [t for t in tokens if t in label.lower()]
+        if len(hits) > len(best_hits):
+            best_hits = hits
+            best_label = label
+
+    if best_label and best_hits:
+        strong = len(best_hits) >= 2 or any(len(h) >= 4 for h in best_hits)
+        if strong:
+            return ComplaintMatchResult(
+                matched=True,
+                reason=best_label,
+                score=len(best_hits),
+                notes=[f"Token match on {', '.join(best_hits)} in '{best_label}'"],
+            )
+        return ComplaintMatchResult(
+            matched=False,
+            reason=None,
+            score=len(best_hits),
+            notes=[f"Weak overlap only ({', '.join(best_hits)}) — clarify required"],
+            clarify=_clarify_other_visits(reason_labels, overlap_tokens=best_hits),
+        )
+
+    return ComplaintMatchResult(
+        matched=False,
+        reason=None,
+        score=0,
+        clarify=_clarify_other_visits(reason_labels),
+    )
 
 
 def complaint_interpretation(complaint: str | None) -> dict[str, Any]:
