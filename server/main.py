@@ -18,6 +18,8 @@ def root():
         "docs": "/docs",
         "estimate": "POST /estimate",
         "ask": "POST /ask",
+        "autozyte": "https://github.com/BadLabz/autozyte",
+        "badlabz": "https://github.com/BadLabz",
     }
 
 
