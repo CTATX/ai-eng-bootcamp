@@ -5,6 +5,7 @@ AI and processing layer for AutoZyte. Optional customer badge: **Powered by Ferd
 ## P2 (now)
 
 - `hypothesis.py` — SQL-only advisor briefing (no LLM tokens)
+- `shop_vocabulary.py` — shop term knowledge (AOS ≠ A/C, etc.); curated, expandable
 
 ## P3+
 
