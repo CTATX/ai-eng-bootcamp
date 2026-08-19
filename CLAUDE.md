@@ -47,13 +47,15 @@ Project index: [BadLabz/Projects](https://github.com/BadLabz/Projects) — `proj
 
 | Piece | Status |
 |-------|--------|
-| `GET /health`, `POST /ask`, `POST /estimate` | Done |
-| Streamlit → API (Cost Estimator + Q&A) | Done |
-| **AutoZyte** (shop, FerdAI, ZyteShelf, Zyren) | **`autozyte/`** → [BadLabz/autozyte](https://github.com/BadLabz/autozyte) |
+| `GET /health`, `POST /ask`, `POST /estimate` | Done (course demo) |
+| Streamlit → API (Cost Estimator demo + Q&A) | Done |
+| **Cost Estimator product** | **[CTATX/ai-build-crew](https://github.com/CTATX/ai-build-crew)** — not this repo |
+| **AutoZyte** (shop, FerdAI, ZyteShelf, Zyren) | [BadLabz/autozyte](https://github.com/BadLabz/autozyte) |
 | Docker + deploy (bootcamp API) | Next (syllabus) |
 
-Use sidebar: **Cost Estimator** | **Bootcamp Q&A**
+Use sidebar: **Cost Estimator** (demo) | **Bootcamp Q&A**
 
-AutoZyte: `cd autozyte && ./start.sh` · see [`docs/autozyte-split.md`](docs/autozyte-split.md)
+Cost Estimator home: [`docs/cost-estimator-home.md`](docs/cost-estimator-home.md) · local `~/ai-build-crew`  
+AutoZyte: `~/autozyte` or nested `autozyte/` · [`docs/autozyte-split.md`](docs/autozyte-split.md)
 
 Playbook: `docs/ai-eng-bootcamp-playbook.md`

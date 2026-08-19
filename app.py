@@ -9,14 +9,15 @@ st.markdown(
     """
 Welcome. Use the **sidebar on the left** to switch apps:
 
-1. **Cost Estimator** — model cost math (`POST /estimate`)
+1. **Cost Estimator** — *course demo* of model cost math (`POST /estimate`)
 2. **Bootcamp Q&A** — ask questions (`POST /ask`)
 
-Shop production code lives in **[AutoZyte](https://github.com/BadLabz/autozyte)** ([BadLabz](https://github.com/BadLabz) org).
+**Product Cost Estimator** (canonical): [ai-build-crew](https://github.com/CTATX/ai-build-crew)  
+**Shop / Jake:** [AutoZyte](https://github.com/BadLabz/autozyte)
 
 Start the API:
 """
 )
 st.code("./start.sh", language="bash")
 
-st.info("Use the sidebar for **Cost Estimator** or **Bootcamp Q&A**.")
+st.info("Sidebar: **Cost Estimator** (demo) or **Bootcamp Q&A**. Full product → ai-build-crew.")

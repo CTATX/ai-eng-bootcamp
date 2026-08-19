@@ -1,21 +1,22 @@
 # AI Eng Bootcamp
 
-TAI Labs Week 1 build: **FastAPI server** + **Streamlit client** — cost estimation and Q&A.
+TAI Labs / Agentic AI Engineer teaching scaffold: **FastAPI** + **Streamlit** — demo cost estimate + Q&A.
 
-**Shop / AutoZyte production code** moved to [`autozyte/`](autozyte/) → [BadLabz/autozyte](https://github.com/BadLabz/autozyte).
+**Cost Estimator product home is not this repo** → [CTATX/ai-build-crew](https://github.com/CTATX/ai-build-crew)  
+(See [`docs/cost-estimator-home.md`](docs/cost-estimator-home.md).)
 
-Hub: [BadLabz/Projects](https://github.com/BadLabz/Projects) · Org: [BadLabz](https://github.com/BadLabz)
+**AutoZyte** (shop / Jake) is separate → [BadLabz/autozyte](https://github.com/BadLabz/autozyte).
 
 ## What this repo is
 
 | Piece | Role |
 |-------|------|
 | `server/` | FastAPI — `GET /health`, `POST /estimate`, `POST /ask` |
-| `pages/1_Cost_Estimator.py` | Streamlit cost estimator |
+| `pages/1_Cost_Estimator.py` | **Course demo** of estimate UI (simplified vs ai-build-crew) |
 | `pages/2_Bootcamp_QA.py` | Streamlit Q&A |
-| `autozyte/` | **AutoZyte product** — push to BadLabz/autozyte |
-| `badlabz-projects/` | **Projects hub** — push to BadLabz/Projects |
 | `docs/ai-eng-bootcamp-playbook.md` | Runbook |
+
+Nested `autozyte/` / `badlabz-projects/` are transitional copies — not the long-term homes.
 
 ## Setup
 
@@ -27,19 +28,19 @@ cp .env.example .env
 # OPENAI_API_KEY for /ask only
 ```
 
-## Run
+## Run (bootcamp demo)
 
 ```bash
 ./start.sh
 ```
 
-## AutoZyte (shop platform)
+## Related repos
 
-```bash
-cd autozyte && ./start.sh
-```
-
-See [`autozyte/README.md`](autozyte/README.md).
+| Repo | Role |
+|------|------|
+| [ai-build-crew](https://github.com/CTATX/ai-build-crew) | **Cost Estimator** (canonical) |
+| [BadLabz/autozyte](https://github.com/BadLabz/autozyte) | Shop platform |
+| [BadLabz/Projects](https://github.com/BadLabz/Projects) | Product hub |
 
 ## TeamOS
 
