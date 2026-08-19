@@ -36,11 +36,18 @@ class HypothesisTests(unittest.TestCase):
         self.assertEqual(packet["likelihood"]["tag"], "UNKNOWN")
 
     def test_complaint_boosts_matching_reason(self) -> None:
-        packet = build_hypothesis(vin="SYNWP020140002", complaint="AOS oil separator")
+        packet = build_hypothesis(vin="SYNWP020240053", complaint="AOS oil separator")
         reasons = [row["label"] for row in packet["common_reasons"]]
-        self.assertTrue(reasons)
-        if any("AOS" in label for label in reasons):
-            self.assertIn("AOS", reasons[0])
+        self.assertIn("AOS / oil separator", reasons)
+        self.assertIn("AOS", reasons[0])
+        self.assertEqual(packet["likelihood"]["selected_reason"], "AOS / oil separator")
+
+    def test_aos_complaint_without_history_is_unknown_not_ac(self) -> None:
+        packet = build_hypothesis(vin="SYNWP020140002", complaint="AOS oil separator")
+        self.assertEqual(packet["likelihood"]["tag"], "UNKNOWN")
+        self.assertNotEqual(packet["likelihood"]["selected_reason"], "A/C service")
+        concepts = packet["complaint_interpretation"]["concepts"]
+        self.assertTrue(any(c["id"] == "aos" for c in concepts))
 
     def test_orchestrator_slots_are_unknown(self) -> None:
         packet = build_hypothesis(vin="SYNWP020140002")

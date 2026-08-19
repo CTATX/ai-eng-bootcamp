@@ -7,6 +7,13 @@ import statistics
 from datetime import UTC, datetime
 from typing import Any
 
+from ferdai.shop_vocabulary import (
+    _complaint_tokens,
+    best_complaint_reason_match,
+    complaint_interpretation,
+    detect_complaint_concepts,
+    score_reason_for_concepts,
+)
 from shop.synthetic import seed_if_empty
 from shop.warehouse import connect
 
@@ -33,12 +40,6 @@ def _percentile(values: list[float], pct: float) -> float | None:
     upper = min(lower + 1, len(ordered) - 1)
     weight = index - lower
     return round(ordered[lower] * (1 - weight) + ordered[upper] * weight, 2)
-
-
-def _complaint_tokens(complaint: str | None) -> list[str]:
-    if not complaint:
-        return []
-    return [token for token in re.split(r"[^a-z0-9]+", complaint.lower()) if len(token) > 2]
 
 
 def _match_vehicle(
@@ -174,6 +175,7 @@ def build_hypothesis(
         ]
 
     tokens = _complaint_tokens(complaint)
+    concepts = detect_complaint_concepts(complaint)
     reason_counts: dict[str, dict[str, Any]] = {}
     for service in services:
         label = service["reason"]
@@ -182,7 +184,11 @@ def build_hypothesis(
             {"label": label, "order_ids": set(), "tag": "FACT", "source": "order_service_name"},
         )
         bucket["order_ids"].add(service["order_id"])
-        if tokens and any(token in label.lower() for token in tokens):
+        concept_score, concept_notes = score_reason_for_concepts(label, concepts)
+        if concept_score > 0:
+            bucket["boost"] = bucket.get("boost", 0) + concept_score
+            bucket["concept_notes"] = concept_notes
+        elif tokens and any(token in label.lower() for token in tokens):
             bucket["boost"] = bucket.get("boost", 0) + 1
 
     ranked_reasons = sorted(
@@ -206,8 +212,30 @@ def build_hypothesis(
         )
 
     selected_reason = common_reasons[0]["label"] if common_reasons else None
+    complaint_match_notes: list[str] = []
+    if concepts:
+        concept_pick, concept_score, complaint_match_notes = best_complaint_reason_match(
+            list(reason_counts.keys()),
+            concepts,
+        )
+        if concept_pick:
+            selected_reason = concept_pick
+        else:
+            selected_reason = None
+            not_in_data.append(
+                {
+                    "topic": "Complaint vs shop history",
+                    "why": (
+                        f"Customer mention maps to {', '.join(c.canonical for c in concepts)} "
+                        "but no matching service name in this vehicle's warehouse orders."
+                    ),
+                }
+            )
+
     selected_order_ids = (
-        set(reason_counts[selected_reason]["order_ids"]) if selected_reason else set(order_ids)
+        set(reason_counts[selected_reason]["order_ids"])
+        if selected_reason and selected_reason in reason_counts
+        else set(order_ids)
     )
 
     part_stats: dict[str, dict[str, Any]] = {}
@@ -262,10 +290,27 @@ def build_hypothesis(
         )
 
     n = len(orders)
-    likelihood_n = len(selected_order_ids) if selected_reason else n
+    likelihood_n = len(selected_order_ids) if selected_reason else 0
     likelihood_pct = (
         round(100 * len(selected_order_ids) / n, 1) if selected_reason and n else None
     )
+
+    if concepts and not selected_reason:
+        concept_names = ", ".join(c.canonical for c in concepts)
+        likelihood_statement = (
+            f"Complaint maps to {concept_names} — no matching job name in shop history; "
+            "not guessing from unrelated visits (A/C and AOS are different)."
+        )
+        likelihood_tag = "UNKNOWN"
+    elif selected_reason and likelihood_pct is not None:
+        likelihood_statement = (
+            f"Based on {n} shop orders, {likelihood_pct}% share for '{selected_reason}' "
+            f"(shop history match — not a manufacturer diagnosis)."
+        )
+        likelihood_tag = "INFERRED" if likelihood_n >= MIN_N_FOR_INFERENCE else "UNKNOWN"
+    else:
+        likelihood_statement = f"Only {n} order(s) — insufficient for a strong likelihood call."
+        likelihood_tag = "UNKNOWN"
 
     not_in_data.extend(
         [
@@ -377,14 +422,11 @@ def build_hypothesis(
                 if ticket_amounts
                 else "UNKNOWN — no ticket amounts"
             ),
-            "tag": "INFERRED" if likelihood_n >= MIN_N_FOR_INFERENCE else "UNKNOWN",
-            "statement": (
-                f"Based on {n} shop orders, {likelihood_pct}% share for '{selected_reason}' "
-                f"(not a Porsche diagnosis)."
-                if selected_reason and likelihood_pct is not None
-                else f"Only {n} order(s) — insufficient for a strong likelihood call."
-            ),
+            "tag": likelihood_tag,
+            "statement": likelihood_statement,
         },
+        "complaint_interpretation": complaint_interpretation(complaint),
+        "complaint_match_notes": complaint_match_notes,
         "recommendations": recommendations,
         "not_in_data": not_in_data,
         "orchestrator": {

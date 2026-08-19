@@ -99,6 +99,10 @@ st.caption(
 
 likelihood = packet["likelihood"]
 st.subheader("Likelihood")
+interp = packet.get("complaint_interpretation") or {}
+if interp.get("concepts"):
+    concept_line = ", ".join(c["canonical"] for c in interp["concepts"])
+    st.caption(f"Complaint terms (shop vocabulary): {concept_line}")
 st.markdown(f"{tag_badge(likelihood.get('tag', 'UNKNOWN'))} {likelihood.get('statement', '')}")
 if likelihood.get("selected_reason"):
     c1, c2, c3 = st.columns(3)
