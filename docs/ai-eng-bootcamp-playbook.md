@@ -221,6 +221,8 @@ source .venv/bin/activate
 
 ```text
 OPENAI_API_KEY=sk-proj-your-key-here
+ASK_MAX_TOKENS=300
+ASK_MAX_USD=1.0
 ```
 
 | ❌ Wrong | ✅ Right |
@@ -228,6 +230,8 @@ OPENAI_API_KEY=sk-proj-your-key-here
 | `OPENAI_API_KEYsk-proj-...` | `OPENAI_API_KEY=sk-proj-...` |
 | Cursor key `sk-crsr-...` | OpenAI key from platform.openai.com |
 | Key in GitHub / chat | Key in `.env` only |
+
+**`/ask` spend guards:** `ASK_MAX_TOKENS` (default 300, hard max 500) caps completion size; `ASK_MAX_USD` (default `$1`) is an in-process daily estimated ceiling. Platform OpenAI billing hard limits are set in the OpenAI dashboard — outside this repo.
 
 After editing `.env`: **Ctrl+C** server → restart uvicorn.
 
