@@ -9,12 +9,15 @@ st.markdown(
     """
 Welcome. Use the **sidebar on the left** to switch apps:
 
-1. **Cost Estimator** — model cost math (`POST /estimate`)
+1. **Cost Estimator** — *course demo* of model cost math (`POST /estimate`)
 2. **Bootcamp Q&A** — ask questions (`POST /ask`)
 
-Both need the API server running in another terminal:
+**Product Cost Estimator** (canonical): [ai-build-crew](https://github.com/CTATX/ai-build-crew)  
+**Shop / Jake:** [AutoZyte](https://github.com/BadLabz/autozyte)
+
+Start the API:
 """
 )
-st.code("uvicorn server.main:app --reload", language="bash")
+st.code("./start.sh", language="bash")
 
-st.info("👈 Click **Cost Estimator** or **Bootcamp Q&A** in the sidebar.")
+st.info("Sidebar: **Cost Estimator** (demo) or **Bootcamp Q&A**. Full product → ai-build-crew.")

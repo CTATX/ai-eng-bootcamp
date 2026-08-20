@@ -1,17 +1,20 @@
 # AI Eng Bootcamp
 
-TAI Labs Week 1 build: **FastAPI server** + **Streamlit client** — cost estimation and Q&A over HTTP.
+TAI Labs / Agentic AI Engineer teaching scaffold: **FastAPI** + **Streamlit** — demo cost estimate + Q&A.
 
-## What this is
+**Cost Estimator product home is not this repo** → [CTATX/ai-build-crew](https://github.com/CTATX/ai-build-crew)  
+(See [`docs/cost-estimator-home.md`](docs/cost-estimator-home.md).)
+
+**AutoZyte** (shop / Jake) is **not** in this repo → [BadLabz/autozyte](https://github.com/BadLabz/autozyte) · [`docs/autozyte-split.md`](docs/autozyte-split.md).
+
+## What this repo is
 
 | Piece | Role |
 |-------|------|
 | `server/` | FastAPI — `GET /health`, `POST /estimate`, `POST /ask` |
-| `app.py` | Streamlit cost estimator → calls `/estimate` |
-| `pages/2_Bootcamp_QA.py` | Streamlit Q&A → calls `/ask` |
-| `docs/ai-eng-bootcamp-playbook.md` | Runbook, troubleshooting, architecture (TeamOS) |
-
-Related: [ai-build-crew](https://github.com/CTATX/ai-build-crew) (production cost planner).
+| `pages/1_Cost_Estimator.py` | **Course demo** of estimate UI (simplified vs ai-build-crew) |
+| `pages/2_Bootcamp_QA.py` | Streamlit Q&A |
+| `docs/ai-eng-bootcamp-playbook.md` | Runbook |
 
 ## Setup
 
@@ -20,35 +23,23 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
-# Edit .env — OPENAI_API_KEY=sk-proj-... (for /ask only)
+# OPENAI_API_KEY for /ask only
 ```
 
-## Run (two terminals)
+## Run (bootcamp demo)
 
-**Easy — one command:**
 ```bash
 ./start.sh
 ```
 
-**Manual — Terminal 1 (server):**
-```bash
-uvicorn server.main:app --reload
-```
+## Related repos
 
-**Terminal 2 — client:**
-```bash
-streamlit run app.py
-```
-
-- API docs: http://127.0.0.1:8000/docs  
-- Streamlit: http://localhost:8501  
+| Repo | Role |
+|------|------|
+| [ai-build-crew](https://github.com/CTATX/ai-build-crew) | **Cost Estimator** (canonical) |
+| [BadLabz/autozyte](https://github.com/BadLabz/autozyte) | Shop platform |
+| [BadLabz/Projects](https://github.com/BadLabz/Projects) | Product hub |
 
 ## TeamOS
 
-Invoke in Cursor/Claude: **`Use TeamOS Bootcamp for [topic]`**  
-Full runbook: [`docs/ai-eng-bootcamp-playbook.md`](docs/ai-eng-bootcamp-playbook.md)
-
-## Syllabus
-
-- [Software components for beginners](https://tailabs.ai/ai-eng-syllabus/pre-course/software-components-for-beginners/)
-- [Session 1 checklist](https://tailabs.ai/ai-eng-syllabus/pre-course/session-1-checklist/)
+`Use TeamOS Bootcamp for [topic]` · [`docs/ai-eng-bootcamp-playbook.md`](docs/ai-eng-bootcamp-playbook.md)
