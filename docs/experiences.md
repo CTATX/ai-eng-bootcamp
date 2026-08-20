@@ -6,11 +6,11 @@
 |---------|------|-------|
 | **Cost Estimator** | [CTATX/ai-build-crew](https://github.com/CTATX/ai-build-crew) | Canonical — PM + Eng courses merge here |
 | **AI Eng Bootcamp** (this repo) | [CTATX/ai-eng-bootcamp](https://github.com/CTATX/ai-eng-bootcamp) | Training demo only |
-| **AutoZyte** | [BadLabz/autozyte](https://github.com/BadLabz/autozyte) | Shop / Jake — separate from Cost Estimator |
+| **AutoZyte** | [BadLabz/autozyte](https://github.com/BadLabz/autozyte) | Shop / Jake — not in this repo |
 | **GT International** | Client | Work *for* them — not the Cost Estimator host |
 | **BraveLabz** | Your company | GitHub org still **BadLabz** until rename step |
 
-See [`cost-estimator-home.md`](cost-estimator-home.md).
+See [`cost-estimator-home.md`](cost-estimator-home.md) · [`autozyte-split.md`](autozyte-split.md).
 
 ## AI Eng Bootcamp (this repo — course demo)
 
@@ -21,13 +21,11 @@ See [`cost-estimator-home.md`](cost-estimator-home.md).
 
 Screenshots: [`docs/examples/`](examples/)
 
-## AutoZyte (production — separate)
+## AutoZyte (separate repo)
 
 | Experience | Repo |
 |------------|------|
-| Shop intelligence, Jake Advisor, FerdAI | [BadLabz/autozyte](https://github.com/BadLabz/autozyte) |
-
-Nested `autozyte/` in this folder is transitional; product home is BadLabz. See [`autozyte-split.md`](autozyte-split.md).
+| Shop intelligence, Jake Advisor, FerdAI | [BadLabz/autozyte](https://github.com/BadLabz/autozyte) · local `~/autozyte` |
 
 ## Run bootcamp demo
 
@@ -48,6 +46,6 @@ pnpm install && pnpm dev
 ## Run AutoZyte
 
 ```bash
-cd ~/autozyte   # or BadLabz/autozyte clone
+cd ~/autozyte
 ./start.sh
 ```

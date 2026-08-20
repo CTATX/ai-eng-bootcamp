@@ -5,7 +5,7 @@ TAI Labs / Agentic AI Engineer teaching scaffold: **FastAPI** + **Streamlit** �
 **Cost Estimator product home is not this repo** → [CTATX/ai-build-crew](https://github.com/CTATX/ai-build-crew)  
 (See [`docs/cost-estimator-home.md`](docs/cost-estimator-home.md).)
 
-**AutoZyte** (shop / Jake) is separate → [BadLabz/autozyte](https://github.com/BadLabz/autozyte).
+**AutoZyte** (shop / Jake) is **not** in this repo → [BadLabz/autozyte](https://github.com/BadLabz/autozyte) · [`docs/autozyte-split.md`](docs/autozyte-split.md).
 
 ## What this repo is
 
@@ -15,8 +15,6 @@ TAI Labs / Agentic AI Engineer teaching scaffold: **FastAPI** + **Streamlit** �
 | `pages/1_Cost_Estimator.py` | **Course demo** of estimate UI (simplified vs ai-build-crew) |
 | `pages/2_Bootcamp_QA.py` | Streamlit Q&A |
 | `docs/ai-eng-bootcamp-playbook.md` | Runbook |
-
-Nested `autozyte/` / `badlabz-projects/` are transitional copies — not the long-term homes.
 
 ## Setup
 

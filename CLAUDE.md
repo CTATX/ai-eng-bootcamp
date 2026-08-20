@@ -56,6 +56,6 @@ Project index: [BadLabz/Projects](https://github.com/BadLabz/Projects) — `proj
 Use sidebar: **Cost Estimator** (demo) | **Bootcamp Q&A**
 
 Cost Estimator home: [`docs/cost-estimator-home.md`](docs/cost-estimator-home.md) · local `~/ai-build-crew`  
-AutoZyte: `~/autozyte` or nested `autozyte/` · [`docs/autozyte-split.md`](docs/autozyte-split.md)
+AutoZyte: `~/autozyte` → [BadLabz/autozyte](https://github.com/BadLabz/autozyte) · [`docs/autozyte-split.md`](docs/autozyte-split.md)
 
 Playbook: `docs/ai-eng-bootcamp-playbook.md`
