@@ -152,8 +152,6 @@ def forecast_cost_ranges(
         if row.model_id == recommendation.model_id
     }
     likely_row = rec_rows["likely"]
-    low_row = rec_rows["low"]
-    high_row = rec_rows["high"]
 
     center = likely_row.cost_per_task_usd
     close_low = center * (1 - uncertainty_pct)
