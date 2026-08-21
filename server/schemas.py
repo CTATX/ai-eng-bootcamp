@@ -19,6 +19,7 @@ class EstimateRequest(BaseModel):
     checker_steps: int = Field(..., ge=0, le=3)
     tasks_per_day: int = Field(..., ge=1, le=10_000)
     workload_note: str | None = None
+    reasoning_depth: int | None = Field(None, ge=1, le=5)
 
 
 class ModelEstimateRow(BaseModel):
@@ -82,6 +83,7 @@ class AnalyzeRequest(BaseModel):
     prompt_text: str = Field(..., min_length=10, max_length=100_000)
     tasks_per_day: int = Field(50, ge=1, le=10_000)
     apply_headroom: bool = False
+    use_llm_classifier: bool = False
 
 
 class AnalyzeResponse(BaseModel):
@@ -89,5 +91,6 @@ class AnalyzeResponse(BaseModel):
     workload_derived: WorkloadDerivedRow
     cost_ranges: CostRangeRow
     rationale: list[str]
+    analyzer_source: str = "heuristic"
     headroom_note: str | None = None
     estimate: EstimateResponse

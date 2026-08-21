@@ -65,12 +65,26 @@ Toggle `apply_headroom: true` on `/analyze` to forecast with an estimated input-
 
 ## Limits (be honest)
 
-- Heuristic analyzer only — no LLM classifier in v1.
+- Heuristic analyzer is the default (no API spend). Optional LLM classifier uses `gpt-4o-mini` (~$0.0001–0.002/prompt).
 - Cannot predict unknown RAG chunks or tool loops not described in the prompt.
 - Dollar amounts use the bootcamp **`models.json`** catalog (illustrative prices), not live provider billing.
 
+## Optional LLM classifier (Phase 2)
+
+Set `use_llm_classifier: true` on `/analyze` (or toggle in Streamlit sidebar). Requires `OPENAI_API_KEY` in `.env`.
+
+- Caps input at 4,000 characters
+- Returns structured JSON dimensions + step hints
+- Merges with heuristics: LLM used when confidence ≥ 0.5; pure LLM when ≥ 0.85
+- Session-level cache avoids repeat charges for identical prompts
+
+## Per-model complexity adjustment
+
+Frontier models in `models.json` (Sonnet, Terra) include `complexity_step_adjustment`: when `reasoning_depth ≥ 4`, primary steps drop by 1 (min 1). This reflects cheaper total cost on hard reasoning when using a stronger model.
+
 ## Files
 
-- `prompt_analyzer.py` — complexity scoring + workload mapping
-- `cost_engine.py` — `forecast_cost_ranges()` broad + close math
+- `prompt_analyzer.py` — complexity scoring + workload mapping + LLM merge
+- `cost_engine.py` — `forecast_cost_ranges()` broad + close math + step adjustment
 - `server/analyze_service.py` — `POST /analyze` orchestration
+- `server/openai_client.py` — optional `classify_prompt_complexity()`

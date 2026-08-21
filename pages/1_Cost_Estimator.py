@@ -10,6 +10,17 @@ from api_client import API_BASE, server_is_up
 st.title("AI Cost Estimator")
 st.caption("Paste a prompt → analyze complexity → see broad cost range and a closer delta.")
 
+if "input_tokens" not in st.session_state:
+    st.session_state.input_tokens = 4_000
+if "result_shape" not in st.session_state:
+    st.session_state.result_shape = "Short answer (≈150 tokens)"
+if "primary_steps" not in st.session_state:
+    st.session_state.primary_steps = 1
+if "checker_steps" not in st.session_state:
+    st.session_state.checker_steps = 1
+if "pending_analyze_payload" not in st.session_state:
+    st.session_state.pending_analyze_payload = None
+
 if server_is_up():
     st.success("Connected to your API")
 else:
@@ -24,6 +35,11 @@ with st.sidebar:
         "- Monthly = cost/task × tasks/day × 30"
     )
     apply_headroom = st.checkbox("Apply Headroom-style token savings", value=False)
+    use_llm_classifier = st.checkbox(
+        "Use AI classifier (uses API credits)",
+        value=False,
+        help="Uses gpt-4o-mini to refine complexity scores when OPENAI_API_KEY is set.",
+    )
     with st.expander("Server command (Terminal 1)"):
         st.code("uvicorn server.main:app --reload", language="bash")
 
@@ -47,24 +63,47 @@ with col_left:
     tasks_per_day = st.number_input("Completed tasks per day", min_value=1, max_value=10_000, value=50)
 
 with col_right:
-    st.subheader("Manual override (optional)")
+    st.subheader("Workload knobs")
+    st.caption("Auto-filled after analyze — adjust manually if needed.")
     input_tokens = st.number_input(
         "Input tokens per task",
         min_value=500,
         max_value=500_000,
-        value=4_000,
         step=500,
-        help="Auto-filled when you analyze a prompt. ~750 tokens per page.",
+        key="input_tokens",
+        help="Rough rule: ~750 tokens per page of text.",
     )
-    result_shape = st.selectbox("Expected result size", result_shapes)
-    primary_steps = st.slider("Primary model steps per task", 1, 5, 1)
-    checker_steps = st.slider("Checker/review steps per task", 0, 3, 1)
+    shape_index = result_shapes.index(st.session_state.result_shape) if st.session_state.result_shape in result_shapes else 0
+    result_shape = st.selectbox(
+        "Expected result size",
+        result_shapes,
+        index=shape_index,
+        key="result_shape",
+    )
+    primary_steps = st.slider("Primary model steps per task", 1, 5, key="primary_steps")
+    checker_steps = st.slider("Checker/review steps per task", 0, 3, key="checker_steps")
 
 analyze_clicked = st.button("Analyze prompt & forecast cost", type="primary", use_container_width=True)
 estimate_clicked = st.button("Estimate from manual knobs only", use_container_width=True)
 
 
-def _render_cost_ranges(data: dict, tasks_per_day: int) -> None:
+def _render_complexity_table(complexity: dict, analyzer_source: str) -> None:
+    st.subheader("Complexity profile")
+    st.caption(f"Source: **{analyzer_source}**")
+    rows = [
+        {"Dimension": "Input size", "Score (1-5)": complexity.get("input_size")},
+        {"Dimension": "Output depth", "Score (1-5)": complexity.get("output_depth")},
+        {"Dimension": "Reasoning depth", "Score (1-5)": complexity.get("reasoning_depth")},
+        {"Dimension": "Verification need", "Score (1-5)": complexity.get("verification_need")},
+        {"Dimension": "Ambiguity risk", "Score (1-5)": complexity.get("ambiguity_risk")},
+        {"Dimension": "Agentic pattern", "Score (1-5)": complexity.get("agentic_pattern")},
+    ]
+    st.dataframe(rows, use_container_width=True, hide_index=True)
+    chart_data = {row["Dimension"]: row["Score (1-5)"] for row in rows}
+    st.bar_chart(chart_data)
+
+
+def _render_cost_ranges(data: dict) -> None:
     ranges = data.get("cost_ranges")
     if not ranges:
         return
@@ -93,9 +132,9 @@ def _render_cost_ranges(data: dict, tasks_per_day: int) -> None:
     complexity = data.get("complexity", {})
     if complexity:
         st.caption(
-            f"Complexity: **{complexity.get('label', '?')}** "
-            f"(score {complexity.get('composite_score', '?')}/30, "
-            f"uncertainty ±{complexity.get('uncertainty_pct', 0):.0%})"
+            f"Label: **{complexity.get('label', '?')}** · "
+            f"score {complexity.get('composite_score', '?')}/30 · "
+            f"uncertainty ±{complexity.get('uncertainty_pct', 0):.0%}"
         )
 
 
@@ -167,31 +206,20 @@ if analyze_clicked:
                     "prompt_text": prompt_text.strip(),
                     "tasks_per_day": int(tasks_per_day),
                     "apply_headroom": apply_headroom,
+                    "use_llm_classifier": use_llm_classifier,
                 },
-                timeout=30,
+                timeout=60,
             )
             response.raise_for_status()
             payload = response.json()
             derived = payload.get("workload_derived", {})
-            estimate = payload.get("estimate", {})
-
             if derived:
-                st.session_state["input_tokens"] = derived["input_tokens"]
-                st.session_state["result_shape"] = derived["result_shape"]
-                st.session_state["primary_steps"] = derived["primary_steps"]
-                st.session_state["checker_steps"] = derived["checker_steps"]
-
-            _render_cost_ranges(payload, int(tasks_per_day))
-
-            if payload.get("rationale"):
-                with st.expander("Why this forecast?"):
-                    for line in payload["rationale"]:
-                        st.markdown(f"- {line}")
-
-            if payload.get("headroom_note"):
-                st.info(payload["headroom_note"])
-
-            _render_estimate_block(estimate)
+                st.session_state.input_tokens = derived["input_tokens"]
+                st.session_state.result_shape = derived["result_shape"]
+                st.session_state.primary_steps = derived["primary_steps"]
+                st.session_state.checker_steps = derived["checker_steps"]
+            st.session_state.pending_analyze_payload = payload
+            st.rerun()
 
         except requests.ConnectionError:
             st.error("Lost connection to the API. Check that the server is still running.")
@@ -207,10 +235,10 @@ elif estimate_clicked:
             response = requests.post(
                 f"{API_BASE}/estimate",
                 json={
-                    "input_tokens": int(input_tokens),
-                    "result_shape": result_shape,
-                    "primary_steps": int(primary_steps),
-                    "checker_steps": int(checker_steps),
+                    "input_tokens": int(st.session_state.input_tokens),
+                    "result_shape": st.session_state.result_shape,
+                    "primary_steps": int(st.session_state.primary_steps),
+                    "checker_steps": int(st.session_state.checker_steps),
                     "tasks_per_day": int(tasks_per_day),
                     "workload_note": prompt_text.strip() or None,
                 },
@@ -225,4 +253,19 @@ elif estimate_clicked:
             detail = response.json().get("detail", response.text)
             st.error(f"API error ({response.status_code}): {detail}")
 else:
-    st.info("Paste a prompt and click **Analyze prompt & forecast cost**, or tune sliders manually.")
+    if st.session_state.pending_analyze_payload:
+        payload = st.session_state.pending_analyze_payload
+        complexity = payload.get("complexity", {})
+        estimate = payload.get("estimate", {})
+        if complexity:
+            _render_complexity_table(complexity, payload.get("analyzer_source", "heuristic"))
+        _render_cost_ranges(payload)
+        if payload.get("rationale"):
+            with st.expander("Why this forecast?"):
+                for line in payload["rationale"]:
+                    st.markdown(f"- {line}")
+        if payload.get("headroom_note"):
+            st.info(payload["headroom_note"])
+        _render_estimate_block(estimate)
+    else:
+        st.info("Paste a prompt and click **Analyze prompt & forecast cost**, or tune sliders manually.")

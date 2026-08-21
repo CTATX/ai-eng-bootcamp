@@ -93,6 +93,14 @@ class WorkloadForecast:
     input_tokens_raw: int
     rationale: list[str] = field(default_factory=list)
     headroom_savings_pct: float = 0.0
+    analyzer_source: str = "heuristic"
+
+
+RESULT_SHAPE_FROM_LLM = {
+    "short": "Short answer (≈150 tokens)",
+    "paragraph": "Paragraph (≈400 tokens)",
+    "report": "Report section (≈900 tokens)",
+}
 
 
 def _clamp(value: int, low: int, high: int) -> int:
@@ -187,26 +195,68 @@ def estimate_headroom_savings(dimensions: ComplexityDimensions, token_count: int
     return 0.45
 
 
-def forecast_workload(
+def merge_classifications(
+    heuristic: ComplexityDimensions,
+    llm_payload: dict | None,
+) -> tuple[ComplexityDimensions, str, dict | None]:
+    """Merge heuristic scores with optional LLM classifier output."""
+    if not llm_payload:
+        return heuristic, "heuristic", None
+
+    confidence = float(llm_payload.get("confidence", 0))
+    if confidence < 0.5:
+        return heuristic, "heuristic", None
+
+    def _dim(name: str, fallback: int) -> int:
+        return _clamp(int(llm_payload.get(name, fallback)), 1, 5)
+
+    merged = ComplexityDimensions(
+        input_size=_dim("input_size", heuristic.input_size),
+        output_depth=_dim("output_depth", heuristic.output_depth),
+        reasoning_depth=_dim("reasoning_depth", heuristic.reasoning_depth),
+        verification_need=_dim("verification_need", heuristic.verification_need),
+        ambiguity_risk=_dim("ambiguity_risk", heuristic.ambiguity_risk),
+        agentic_pattern=_dim("agentic_pattern", heuristic.agentic_pattern),
+    )
+    source = "llm" if confidence >= 0.85 else "hybrid"
+    step_hints = {
+        "primary_steps": _clamp(int(llm_payload.get("primary_steps", 1)), 1, 5),
+        "checker_steps": _clamp(int(llm_payload.get("checker_steps", 0)), 0, 3),
+        "result_shape": llm_payload.get("result_shape"),
+    }
+    return merged, source, step_hints
+
+
+def _build_workload_from_dimensions(
     prompt_text: str,
-    tasks_per_day: int = 50,
+    dimensions: ComplexityDimensions,
+    tasks_per_day: int,
     *,
     apply_headroom: bool = False,
+    step_hints: dict | None = None,
+    analyzer_source: str = "heuristic",
 ) -> WorkloadForecast:
     raw_tokens = count_tokens(prompt_text)
-    dimensions = score_complexity(prompt_text, raw_tokens)
     rationale: list[str] = []
 
     buffered_tokens = int((raw_tokens + SYSTEM_BUFFER_TOKENS) * (1 + CONTEXT_SAFETY_MARGIN))
     input_tokens = _clamp(buffered_tokens, 500, 500_000)
 
-    result_shape = _pick_result_shape(dimensions.output_depth)
-    primary_steps = _pick_primary_steps(
-        dimensions.reasoning_depth,
-        dimensions.agentic_pattern,
-        dimensions.composite_score,
-    )
-    checker_steps = _pick_checker_steps(dimensions.verification_need, dimensions.ambiguity_risk)
+    if step_hints and step_hints.get("result_shape") in RESULT_SHAPE_FROM_LLM:
+        result_shape = RESULT_SHAPE_FROM_LLM[str(step_hints["result_shape"])]
+    else:
+        result_shape = _pick_result_shape(dimensions.output_depth)
+
+    if step_hints and analyzer_source in ("llm", "hybrid"):
+        primary_steps = step_hints["primary_steps"]
+        checker_steps = step_hints["checker_steps"]
+    else:
+        primary_steps = _pick_primary_steps(
+            dimensions.reasoning_depth,
+            dimensions.agentic_pattern,
+            dimensions.composite_score,
+        )
+        checker_steps = _pick_checker_steps(dimensions.verification_need, dimensions.ambiguity_risk)
 
     headroom_pct = estimate_headroom_savings(dimensions, raw_tokens)
     if apply_headroom and headroom_pct > 0:
@@ -219,6 +269,7 @@ def forecast_workload(
 
     rationale.extend(
         [
+            f"Analyzer: {analyzer_source}.",
             f"Complexity: {dimensions.label} (score {dimensions.composite_score}/30).",
             f"Input tokens: {raw_tokens:,} raw → {input_tokens:,} with buffer.",
             f"Output shape: {result_shape} (output depth {dimensions.output_depth}/5).",
@@ -228,6 +279,10 @@ def forecast_workload(
     )
     if dimensions.ambiguity_risk >= 3:
         rationale.append("Ambiguity detected — close cost delta widened for retries.")
+    if dimensions.reasoning_depth >= 4:
+        rationale.append(
+            "High reasoning depth — frontier models (Sonnet, Terra) may use fewer primary steps."
+        )
 
     workload = Workload(
         input_tokens=input_tokens,
@@ -242,4 +297,25 @@ def forecast_workload(
         input_tokens_raw=raw_tokens,
         rationale=rationale,
         headroom_savings_pct=headroom_pct if apply_headroom else 0.0,
+        analyzer_source=analyzer_source,
+    )
+
+
+def forecast_workload(
+    prompt_text: str,
+    tasks_per_day: int = 50,
+    *,
+    apply_headroom: bool = False,
+    llm_payload: dict | None = None,
+) -> WorkloadForecast:
+    raw_tokens = count_tokens(prompt_text)
+    heuristic = score_complexity(prompt_text, raw_tokens)
+    dimensions, analyzer_source, step_hints = merge_classifications(heuristic, llm_payload)
+    return _build_workload_from_dimensions(
+        prompt_text,
+        dimensions,
+        tasks_per_day,
+        apply_headroom=apply_headroom,
+        step_hints=step_hints,
+        analyzer_source=analyzer_source,
     )
