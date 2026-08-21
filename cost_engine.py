@@ -49,11 +49,33 @@ def _per_million_tokens(tokens: int, price_per_million: float) -> float:
     return (tokens / 1_000_000) * price_per_million
 
 
-def estimate_for_model(model: dict, workload: Workload, scenario: Scenario) -> CostEstimate:
+def _effective_primary_steps(
+    model: dict,
+    workload: Workload,
+    reasoning_depth: int | None = None,
+) -> int:
+    primary = workload.primary_steps
+    adjustment = model.get("complexity_step_adjustment")
+    if adjustment and reasoning_depth is not None:
+        threshold = adjustment.get("reasoning_threshold", 4)
+        delta = adjustment.get("primary_step_delta", 0)
+        if reasoning_depth >= threshold:
+            primary = max(1, min(5, primary + delta))
+    return primary
+
+
+def estimate_for_model(
+    model: dict,
+    workload: Workload,
+    scenario: Scenario,
+    *,
+    reasoning_depth: int | None = None,
+) -> CostEstimate:
     base_output = RESULT_SHAPE_TOKENS[workload.result_shape]
     output_tokens = int(base_output * model["output_multiplier"][scenario])
     retry_mult = model["retry_multiplier"][scenario]
-    attempted_calls = (workload.primary_steps + workload.checker_steps) * retry_mult
+    primary_steps = _effective_primary_steps(model, workload, reasoning_depth)
+    attempted_calls = (primary_steps + workload.checker_steps) * retry_mult
 
     eligible = workload.input_tokens <= model["context_tokens"]
     ineligible_reason = None
@@ -63,7 +85,7 @@ def estimate_for_model(model: dict, workload: Workload, scenario: Scenario) -> C
             f"model context is {model['context_tokens']:,}."
         )
 
-    primary_calls = workload.primary_steps * retry_mult
+    primary_calls = primary_steps * retry_mult
     checker_calls = workload.checker_steps * retry_mult
 
     input_cost = _per_million_tokens(workload.input_tokens, model["input"]) * attempted_calls
@@ -85,19 +107,29 @@ def estimate_for_model(model: dict, workload: Workload, scenario: Scenario) -> C
     )
 
 
-def estimate_all(workload: Workload, catalog_path: Path | None = None) -> list[CostEstimate]:
+def estimate_all(
+    workload: Workload,
+    catalog_path: Path | None = None,
+    *,
+    reasoning_depth: int | None = None,
+) -> list[CostEstimate]:
     models = load_models(catalog_path)
     return [
-        estimate_for_model(model, workload, scenario)
+        estimate_for_model(model, workload, scenario, reasoning_depth=reasoning_depth)
         for model in models
         for scenario in ("low", "likely", "high")
     ]
 
 
-def recommend_model(workload: Workload, catalog_path: Path | None = None) -> CostEstimate | None:
+def recommend_model(
+    workload: Workload,
+    catalog_path: Path | None = None,
+    *,
+    reasoning_depth: int | None = None,
+) -> CostEstimate | None:
     likely = [
         estimate
-        for estimate in estimate_all(workload, catalog_path)
+        for estimate in estimate_all(workload, catalog_path, reasoning_depth=reasoning_depth)
         if estimate.scenario == "likely" and estimate.eligible
     ]
     if not likely:
@@ -130,9 +162,10 @@ def forecast_cost_ranges(
     *,
     uncertainty_pct: float = 0.15,
     catalog_path: Path | None = None,
+    reasoning_depth: int | None = None,
 ) -> CostRangeForecast | None:
     """Return broad x–y range and a tighter delta around the likely recommendation."""
-    estimates = estimate_all(workload, catalog_path)
+    estimates = estimate_all(workload, catalog_path, reasoning_depth=reasoning_depth)
     eligible = [row for row in estimates if row.eligible]
     if not eligible:
         return None
@@ -142,7 +175,7 @@ def forecast_cost_ranges(
     broad_min = min(row.cost_per_task_usd for row in low_rows)
     broad_max = max(row.cost_per_task_usd for row in high_rows)
 
-    recommendation = recommend_model(workload, catalog_path)
+    recommendation = recommend_model(workload, catalog_path, reasoning_depth=reasoning_depth)
     if recommendation is None:
         return None
 
