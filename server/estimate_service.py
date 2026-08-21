@@ -34,8 +34,8 @@ def run_estimate(body: EstimateRequest) -> EstimateResponse:
         tasks_per_day=body.tasks_per_day,
     )
 
-    recommendation = recommend_model(workload)
-    estimates = estimate_all(workload)
+    recommendation = recommend_model(workload, reasoning_depth=body.reasoning_depth)
+    estimates = estimate_all(workload, reasoning_depth=body.reasoning_depth)
     likely_rows = sorted(
         [_to_row(row) for row in estimates if row.scenario == "likely" and row.eligible],
         key=lambda row: row.cost_per_task_usd,

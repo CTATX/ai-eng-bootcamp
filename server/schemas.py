@@ -19,6 +19,7 @@ class EstimateRequest(BaseModel):
     checker_steps: int = Field(..., ge=0, le=3)
     tasks_per_day: int = Field(..., ge=1, le=10_000)
     workload_note: str | None = None
+    reasoning_depth: int | None = Field(None, ge=1, le=5)
 
 
 class ModelEstimateRow(BaseModel):
@@ -39,3 +40,57 @@ class EstimateResponse(BaseModel):
     recommendation: ModelEstimateRow | None
     likely_comparison: list[ModelEstimateRow]
     scenario_ranges: list[ModelEstimateRow]
+
+
+class ComplexityDimensionsRow(BaseModel):
+    label: str
+    composite_score: int
+    input_size: int
+    output_depth: int
+    reasoning_depth: int
+    verification_need: int
+    ambiguity_risk: int
+    agentic_pattern: int
+    uncertainty_pct: float
+
+
+class WorkloadDerivedRow(BaseModel):
+    input_tokens_raw: int
+    input_tokens: int
+    result_shape: str
+    primary_steps: int
+    checker_steps: int
+    tasks_per_day: int
+
+
+class CostRangeRow(BaseModel):
+    broad_min_per_task_usd: float
+    broad_max_per_task_usd: float
+    broad_min_monthly_usd: float
+    broad_max_monthly_usd: float
+    close_center_per_task_usd: float
+    close_low_per_task_usd: float
+    close_high_per_task_usd: float
+    close_delta_per_task_usd: float
+    close_center_monthly_usd: float
+    close_low_monthly_usd: float
+    close_high_monthly_usd: float
+    recommended_model_id: str | None
+    recommended_model_name: str | None
+
+
+class AnalyzeRequest(BaseModel):
+    prompt_text: str = Field(..., min_length=10, max_length=100_000)
+    tasks_per_day: int = Field(50, ge=1, le=10_000)
+    apply_headroom: bool = False
+    use_llm_classifier: bool = False
+
+
+class AnalyzeResponse(BaseModel):
+    complexity: ComplexityDimensionsRow
+    workload_derived: WorkloadDerivedRow
+    cost_ranges: CostRangeRow
+    rationale: list[str]
+    analyzer_source: str = "heuristic"
+    headroom_note: str | None = None
+    estimate: EstimateResponse
