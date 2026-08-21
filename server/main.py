@@ -2,9 +2,17 @@
 
 from fastapi import FastAPI, HTTPException
 
+from server.analyze_service import run_analyze
 from server.estimate_service import run_estimate
 from server.openai_client import ask_openai
-from server.schemas import AskRequest, AskResponse, EstimateRequest, EstimateResponse
+from server.schemas import (
+    AnalyzeRequest,
+    AnalyzeResponse,
+    AskRequest,
+    AskResponse,
+    EstimateRequest,
+    EstimateResponse,
+)
 
 app = FastAPI(title="AI Eng Bootcamp API")
 
@@ -17,6 +25,7 @@ def root():
         "health": "/health",
         "docs": "/docs",
         "estimate": "POST /estimate",
+        "analyze": "POST /analyze",
         "ask": "POST /ask",
     }
 
@@ -32,6 +41,15 @@ def estimate(body: EstimateRequest):
     """Estimate model cost for a workload — powers the first Streamlit app."""
     try:
         return run_estimate(body)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@app.post("/analyze", response_model=AnalyzeResponse)
+def analyze(body: AnalyzeRequest):
+    """Analyze a prompt → complexity, cost broad range, and closer delta."""
+    try:
+        return run_analyze(body)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
