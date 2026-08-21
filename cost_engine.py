@@ -103,3 +103,74 @@ def recommend_model(workload: Workload, catalog_path: Path | None = None) -> Cos
     if not likely:
         return None
     return min(likely, key=lambda item: item.cost_per_task_usd)
+
+
+@dataclass(frozen=True)
+class CostRangeForecast:
+    """Broad envelope (all models × scenarios) and closer band (recommended model)."""
+
+    broad_min_per_task_usd: float
+    broad_max_per_task_usd: float
+    broad_min_monthly_usd: float
+    broad_max_monthly_usd: float
+    close_center_per_task_usd: float
+    close_low_per_task_usd: float
+    close_high_per_task_usd: float
+    close_delta_per_task_usd: float
+    close_center_monthly_usd: float
+    close_low_monthly_usd: float
+    close_high_monthly_usd: float
+    uncertainty_pct: float
+    recommended_model_id: str | None
+    recommended_model_name: str | None
+
+
+def forecast_cost_ranges(
+    workload: Workload,
+    *,
+    uncertainty_pct: float = 0.15,
+    catalog_path: Path | None = None,
+) -> CostRangeForecast | None:
+    """Return broad x–y range and a tighter delta around the likely recommendation."""
+    estimates = estimate_all(workload, catalog_path)
+    eligible = [row for row in estimates if row.eligible]
+    if not eligible:
+        return None
+
+    low_rows = [row for row in eligible if row.scenario == "low"]
+    high_rows = [row for row in eligible if row.scenario == "high"]
+    broad_min = min(row.cost_per_task_usd for row in low_rows)
+    broad_max = max(row.cost_per_task_usd for row in high_rows)
+
+    recommendation = recommend_model(workload, catalog_path)
+    if recommendation is None:
+        return None
+
+    rec_rows = {
+        row.scenario: row
+        for row in eligible
+        if row.model_id == recommendation.model_id
+    }
+    likely_row = rec_rows["likely"]
+
+    center = likely_row.cost_per_task_usd
+    close_low = center * (1 - uncertainty_pct)
+    close_high = center * (1 + uncertainty_pct)
+    delta = center * uncertainty_pct
+
+    return CostRangeForecast(
+        broad_min_per_task_usd=broad_min,
+        broad_max_per_task_usd=broad_max,
+        broad_min_monthly_usd=broad_min * workload.tasks_per_day * 30,
+        broad_max_monthly_usd=broad_max * workload.tasks_per_day * 30,
+        close_center_per_task_usd=center,
+        close_low_per_task_usd=close_low,
+        close_high_per_task_usd=close_high,
+        close_delta_per_task_usd=delta,
+        close_center_monthly_usd=likely_row.monthly_usd,
+        close_low_monthly_usd=close_low * workload.tasks_per_day * 30,
+        close_high_monthly_usd=close_high * workload.tasks_per_day * 30,
+        uncertainty_pct=uncertainty_pct,
+        recommended_model_id=recommendation.model_id,
+        recommended_model_name=recommendation.name,
+    )
