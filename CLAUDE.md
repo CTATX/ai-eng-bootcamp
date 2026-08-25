@@ -47,15 +47,23 @@ Project index: [BadLabz/Projects](https://github.com/BadLabz/Projects) — `proj
 
 | Piece | Status |
 |-------|--------|
-| `GET /health`, `POST /ask`, `POST /estimate` | Done (course demo) |
+| `GET /health`, `POST /ask`, `POST /estimate`, `POST /analyze` | Done (course demo) |
 | Streamlit → API (Cost Estimator demo + Q&A) | Done |
 | **Cost Estimator product** | **[CTATX/ai-build-crew](https://github.com/CTATX/ai-build-crew)** — not this repo |
-| **AutoZyte** (shop, FerdAI, ZyteShelf, Zyren) | [BadLabz/autozyte](https://github.com/BadLabz/autozyte) |
+| **AutoZyte** (shop, FerdAI, ZyteShelf, Zyren) | [BadLabz/autozyte](https://github.com/BadLabz/autozyte) · local `~/autozyte` |
+| Cloud Agent dev environment (`.cursor/environment.json`) | Done — validated end-to-end, merged (#3) |
 | Docker + deploy (bootcamp API) | Next (syllabus) |
 
 Use sidebar: **Cost Estimator** (demo) | **Bootcamp Q&A**
 
 Cost Estimator home: [`docs/cost-estimator-home.md`](docs/cost-estimator-home.md) · local `~/ai-build-crew`  
-AutoZyte: `~/autozyte` → [BadLabz/autozyte](https://github.com/BadLabz/autozyte) · [`docs/autozyte-split.md`](docs/autozyte-split.md)
+AutoZyte: `~/autozyte` → [BadLabz/autozyte](https://github.com/BadLabz/autozyte) · [`docs/autozyte-split.md`](docs/autozyte-split.md)  
+System map + `/ask` spend guards: [`docs/experiences.md`](docs/experiences.md)
 
-Playbook: `docs/ai-eng-bootcamp-playbook.md`
+### Every session — one command (recommended)
+
+```bash
+./start.sh
+```
+
+Starts API + Streamlit. **Ctrl+C** stops both. See playbook §4.
