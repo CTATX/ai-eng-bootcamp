@@ -32,5 +32,6 @@ else
 fi
 
 echo "Starting Streamlit — sidebar: Cost Estimator | Bootcamp Q&A"
+echo "AutoZyte (shop): clone BadLabz/autozyte → ~/autozyte (not in this repo)"
 echo "Stop everything: Ctrl+C in this terminal."
 streamlit run app.py

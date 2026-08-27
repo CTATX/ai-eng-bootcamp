@@ -1,4 +1,7 @@
-"""Deterministic cost estimation — simplified slice of ai-build-crew logic."""
+"""Deterministic cost estimation — course demo (simplified slice of ai-build-crew).
+
+Canonical Cost Estimator product: https://github.com/CTATX/ai-build-crew
+"""
 
 from __future__ import annotations
 

@@ -11,7 +11,7 @@ TAI Labs / Agentic AI Engineer teaching scaffold: **FastAPI** + **Streamlit** �
 
 | Piece | Role |
 |-------|------|
-| `server/` | FastAPI — `GET /health`, `POST /estimate`, `POST /ask` |
+| `server/` | FastAPI — `GET /health`, `POST /estimate`, `POST /analyze`, `POST /ask` |
 | `pages/1_Cost_Estimator.py` | **Course demo** of estimate UI (simplified vs ai-build-crew) |
 | `pages/2_Bootcamp_QA.py` | Streamlit Q&A |
 | `docs/ai-eng-bootcamp-playbook.md` | Runbook |

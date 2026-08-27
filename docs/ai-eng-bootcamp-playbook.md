@@ -20,6 +20,7 @@ TAI Labs Week 1 learning artifact. Load this doc on demand — do not paste into
 10. [Concepts glossary](#10-concepts-glossary)
 11. [Tie to ai-build-crew](#11-tie-to-ai-build-crew)
 12. [Demo script](#12-demo-script)
+13. [Shop intelligence (plan)](#13-shop-intelligence-plan)
 
 ---
 
@@ -76,6 +77,11 @@ Browser / curl
 | `.env` | `OPENAI_API_KEY` (server only, gitignored) |
 | `CLAUDE.md` | Project index for agents |
 | `.claude/agents/ai-eng-bootcamp-agent.md` | TeamOS agent stub |
+| `docs/shop-intelligence-plan.md` | Licensed ShopMonkey shop-intel phases P0–P7 |
+| `docs/shop-intelligence-jtbd.md` | Running JTBD and requirements (rough cut) |
+| `docs/experiences.md` | Published GitHub paths and screenshots for each app |
+| `docs/shop-intelligence-briefing.schema.json` | Chat briefing contract (FACT / INFERRED / UNKNOWN) |
+| `pages/3_Shop_Intelligence.py` | Synthetic Porsche warehouse screens |
 
 ---
 
@@ -121,7 +127,7 @@ source .venv/bin/activate
 streamlit run app.py
 ```
 
-Use sidebar: **Cost Estimator** | **Bootcamp Q&A**
+Use sidebar: **Cost Estimator** | **Bootcamp Q&A** | **Shop intelligence**
 
 ### Verify without browser
 
@@ -170,6 +176,9 @@ source .venv/bin/activate
 | GET | `/health` | — | `{"status":"ok"}` |
 | POST | `/estimate` | `input_tokens`, `result_shape`, `primary_steps`, `checker_steps`, `tasks_per_day` | `recommendation`, `likely_comparison`, `scenario_ranges` |
 | POST | `/ask` | `{"question":"..."}` | `{"answer":"...","confidence":0.85}` |
+| GET | `/shop/status` | — | Synthetic warehouse counts (no ShopMonkey key) |
+| GET | `/shop/trends/tickets` | — | Ticket by year |
+| GET | `/shop/parts` | — | Synthetic product list (named vendors, fake SKUs) |
 
 **Contract** = shapes in `server/schemas.py`. Invalid input → rejected before logic runs.
 
@@ -212,6 +221,8 @@ source .venv/bin/activate
 
 ```text
 OPENAI_API_KEY=sk-proj-your-key-here
+ASK_MAX_TOKENS=300
+ASK_MAX_USD=1.0
 ```
 
 | ❌ Wrong | ✅ Right |
@@ -219,6 +230,8 @@ OPENAI_API_KEY=sk-proj-your-key-here
 | `OPENAI_API_KEYsk-proj-...` | `OPENAI_API_KEY=sk-proj-...` |
 | Cursor key `sk-crsr-...` | OpenAI key from platform.openai.com |
 | Key in GitHub / chat | Key in `.env` only |
+
+**`/ask` spend guards:** `ASK_MAX_TOKENS` (default 300, hard max 500) caps completion size; `ASK_MAX_USD` (default `$1`) is an in-process daily estimated ceiling. Platform OpenAI billing hard limits are set in the OpenAI dashboard — outside this repo.
 
 After editing `.env`: **Ctrl+C** server → restart uvicorn.
 
@@ -265,6 +278,20 @@ Same product thinking; bootcamp = Python learning scaffold; ai-build-crew = prod
 6. Browser: `http://127.0.0.1:8000/docs` → show contract
 
 **One-liner:** "I built a FastAPI service with two endpoints; Streamlit is a thin client."
+
+---
+
+## 13. Shop intelligence (plan)
+
+Licensed shop owner using ShopMonkey’s **official API** for internal analysis. Not a reskin.
+
+- JTBD / requirements (running): [`docs/shop-intelligence-jtbd.md`](shop-intelligence-jtbd.md)
+- Plan: [`docs/shop-intelligence-plan.md`](shop-intelligence-plan.md)
+- Briefing contract: [`docs/shop-intelligence-briefing.schema.json`](shop-intelligence-briefing.schema.json)
+
+**P1 now:** synthetic Porsche 1980–2025 warehouse. No ShopMonkey key. Sidebar → **Shop intelligence**.
+
+Chat and multi-agent stay parked.
 
 ---
 
