@@ -40,7 +40,8 @@
       "output": 25.0,
       "context_tokens": 400000,
       "output_multiplier": {"low": 0.65, "likely": 1.0, "high": 1.8},
-      "retry_multiplier": {"low": 1.0, "likely": 1.25, "high": 1.75}
+      "retry_multiplier": {"low": 1.0, "likely": 1.25, "high": 1.75},
+      "complexity_step_adjustment": {"reasoning_threshold": 4, "primary_step_delta": -1}
     },
     {
       "id": "claude-sonnet-4.6",
@@ -50,7 +51,8 @@
       "output": 15.0,
       "context_tokens": 200000,
       "output_multiplier": {"low": 0.65, "likely": 1.0, "high": 1.8},
-      "retry_multiplier": {"low": 1.0, "likely": 1.25, "high": 1.75}
+      "retry_multiplier": {"low": 1.0, "likely": 1.25, "high": 1.75},
+      "complexity_step_adjustment": {"reasoning_threshold": 4, "primary_step_delta": -1}
     }
   ]
 }

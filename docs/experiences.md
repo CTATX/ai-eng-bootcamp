@@ -53,6 +53,8 @@ Screenshots: [`docs/examples/`](examples/)
 
 **`/ask` spend guards (light):** `ASK_MAX_TOKENS` (default 300, hard max 500) and `ASK_MAX_USD` daily estimated ceiling (default `$1`) in `.env` — see playbook §9.
 
+**Classifier / `/analyze` LLM guards (separate wallet):** Classifier default **OFF**. When `use_llm_classifier=true`: `CLASSIFIER_MAX_TOKENS` ≤ 300, per-call ≤ `$0.02`, daily `CLASSIFIER_MAX_USD` / `ANALYZE_MAX_USD` default `$0.50` (does **not** share `ASK_MAX_USD`). If predicted > `$0.05` or daily remaining < `$0.10`, require `classifier_spend_approved` on the request, Streamlit approval checkbox, or `CLASSIFIER_SPEND_APPROVED=1` — otherwise fail closed.
+
 ## AutoZyte (separate repo)
 
 | Experience | Repo |
