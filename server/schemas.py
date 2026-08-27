@@ -84,6 +84,7 @@ class AnalyzeRequest(BaseModel):
     tasks_per_day: int = Field(50, ge=1, le=10_000)
     apply_headroom: bool = False
     use_llm_classifier: bool = False
+    classifier_spend_approved: bool = False
 
 
 class AnalyzeResponse(BaseModel):

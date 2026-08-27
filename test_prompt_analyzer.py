@@ -188,6 +188,7 @@ def test_analyze_endpoint_shape():
         use_llm_classifier=False,
     )
     assert body.use_llm_classifier is False
+    assert body.classifier_spend_approved is False
 
 
 def test_recommend_model_with_reasoning_depth():
@@ -195,3 +196,37 @@ def test_recommend_model_with_reasoning_depth():
     rec = recommend_model(forecast.workload, reasoning_depth=forecast.dimensions.reasoning_depth)
     assert rec is not None
     assert rec.eligible
+
+
+def test_classifier_spend_guards_separate_wallet_and_approval(monkeypatch):
+    import server.openai_client as oc
+
+    monkeypatch.delenv("CLASSIFIER_SPEND_APPROVED", raising=False)
+    monkeypatch.setenv("CLASSIFIER_MAX_USD", "0.50")
+    oc._classifier_spend_day = None
+    oc._classifier_spend_usd = 0.0
+
+    tokens, predicted = oc._assert_classifier_spend_allowed("short prompt for classify", spend_approved=False)
+    assert tokens <= 300
+    assert predicted <= 0.02
+
+    # Near end of daily wallet → approval required
+    oc._classifier_spend_usd = 0.45
+    with pytest.raises(ValueError, match="approval required"):
+        oc._assert_classifier_spend_allowed("short prompt for classify", spend_approved=False)
+
+    tokens2, _ = oc._assert_classifier_spend_allowed("short prompt for classify", spend_approved=True)
+    assert tokens2 <= 300
+
+    # Exhausted daily wallet → fail closed even with approval
+    oc._classifier_spend_usd = 0.50
+    with pytest.raises(ValueError, match="daily spend guard"):
+        oc._assert_classifier_spend_allowed("short prompt for classify", spend_approved=True)
+
+
+def test_classifier_max_usd_alias_analyze(monkeypatch):
+    import server.openai_client as oc
+
+    monkeypatch.delenv("CLASSIFIER_MAX_USD", raising=False)
+    monkeypatch.setenv("ANALYZE_MAX_USD", "0.25")
+    assert oc._classifier_max_usd() == 0.25

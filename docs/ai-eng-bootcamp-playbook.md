@@ -223,6 +223,9 @@ source .venv/bin/activate
 OPENAI_API_KEY=sk-proj-your-key-here
 ASK_MAX_TOKENS=300
 ASK_MAX_USD=1.0
+CLASSIFIER_MAX_TOKENS=300
+CLASSIFIER_MAX_USD=0.50
+# CLASSIFIER_SPEND_APPROVED=1
 ```
 
 | ❌ Wrong | ✅ Right |
@@ -232,6 +235,8 @@ ASK_MAX_USD=1.0
 | Key in GitHub / chat | Key in `.env` only |
 
 **`/ask` spend guards:** `ASK_MAX_TOKENS` (default 300, hard max 500) caps completion size; `ASK_MAX_USD` (default `$1`) is an in-process daily estimated ceiling. Platform OpenAI billing hard limits are set in the OpenAI dashboard — outside this repo.
+
+**Classifier / `/analyze` LLM guards (separate from `/ask`):** default **OFF**. `CLASSIFIER_MAX_TOKENS` (hard max 300), per-call ≤ `$0.02`, daily `CLASSIFIER_MAX_USD` (alias `ANALYZE_MAX_USD`, default `$0.50`). Approval required when predicted > `$0.05` or daily remaining < `$0.10` via `classifier_spend_approved`, Streamlit checkbox, or `CLASSIFIER_SPEND_APPROVED=1` — fail closed otherwise.
 
 After editing `.env`: **Ctrl+C** server → restart uvicorn.
 

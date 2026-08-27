@@ -24,9 +24,16 @@ _classification_cache: dict[str, dict[str, Any]] = {}
 _INPUT_PER_M = 0.15
 _OUTPUT_PER_M = 0.60
 _HARD_MAX_TOKENS = 500
+_CLASSIFIER_HARD_MAX_TOKENS = 300
+_CLASSIFIER_PER_CALL_MAX_USD = 0.02
+_CLASSIFIER_APPROVAL_PREDICTED_USD = 0.05
+_CLASSIFIER_APPROVAL_REMAINING_USD = 0.10
 
 _spend_day: date | None = None
 _spend_usd: float = 0.0
+
+_classifier_spend_day: date | None = None
+_classifier_spend_usd: float = 0.0
 
 
 def _api_key_available() -> bool:
@@ -47,6 +54,23 @@ def _ask_max_usd() -> float:
     return float(os.getenv("ASK_MAX_USD", "1.0"))
 
 
+def _classifier_max_tokens() -> int:
+    raw = int(os.getenv("CLASSIFIER_MAX_TOKENS", "300"))
+    return max(1, min(raw, _CLASSIFIER_HARD_MAX_TOKENS))
+
+
+def _classifier_max_usd() -> float:
+    """Separate daily wallet from /ask. CLASSIFIER_MAX_USD preferred; ANALYZE_MAX_USD alias."""
+    raw = os.getenv("CLASSIFIER_MAX_USD")
+    if raw is None or raw.strip() == "":
+        raw = os.getenv("ANALYZE_MAX_USD", "0.50")
+    return float(raw)
+
+
+def _env_spend_approved() -> bool:
+    return os.getenv("CLASSIFIER_SPEND_APPROVED", "").strip().lower() in ("1", "true", "yes")
+
+
 def _reset_daily_if_needed() -> None:
     global _spend_day, _spend_usd
     today = date.today()
@@ -55,9 +79,23 @@ def _reset_daily_if_needed() -> None:
         _spend_usd = 0.0
 
 
-def _estimate_call_usd(question: str, max_tokens: int) -> float:
-    input_tokens = max(1, len(question) // 4 + 40)
+def _reset_classifier_daily_if_needed() -> None:
+    global _classifier_spend_day, _classifier_spend_usd
+    today = date.today()
+    if _classifier_spend_day != today:
+        _classifier_spend_day = today
+        _classifier_spend_usd = 0.0
+
+
+def _estimate_call_usd(text: str, max_tokens: int) -> float:
+    input_tokens = max(1, len(text) // 4 + 40)
     return (input_tokens * _INPUT_PER_M + max_tokens * _OUTPUT_PER_M) / 1_000_000
+
+
+def _usage_usd(usage: Any, predicted: float) -> float:
+    if usage is not None:
+        return (usage.prompt_tokens * _INPUT_PER_M + usage.completion_tokens * _OUTPUT_PER_M) / 1_000_000
+    return predicted
 
 
 def ask_openai(question: str) -> AskResponse:
@@ -91,19 +129,61 @@ def ask_openai(question: str) -> AskResponse:
         max_tokens=max_tokens,
     )
 
-    usage = completion.usage
-    if usage is not None:
-        actual = (usage.prompt_tokens * _INPUT_PER_M + usage.completion_tokens * _OUTPUT_PER_M) / 1_000_000
-    else:
-        actual = predicted
+    actual = _usage_usd(completion.usage, predicted)
     _spend_usd += actual
 
     answer = completion.choices[0].message.content or "No answer returned."
     return AskResponse(answer=answer.strip(), confidence=0.85)
 
 
-def classify_prompt_complexity(prompt_text: str) -> dict[str, Any] | None:
+def _assert_classifier_spend_allowed(prompt_text: str, *, spend_approved: bool) -> tuple[int, float]:
+    """Fail-closed classifier guards. Returns (max_tokens, predicted_usd)."""
+    max_tokens = _classifier_max_tokens()
+    daily_max = _classifier_max_usd()
+    _reset_classifier_daily_if_needed()
+    predicted = _estimate_call_usd(prompt_text, max_tokens)
+
+    if predicted > _CLASSIFIER_PER_CALL_MAX_USD:
+        raise ValueError(
+            f"Classifier per-call spend guard exceeded "
+            f"(predicted ${predicted:.4f} > ${_CLASSIFIER_PER_CALL_MAX_USD:.2f}). "
+            "Shorten the prompt or lower CLASSIFIER_MAX_TOKENS."
+        )
+
+    remaining = daily_max - _classifier_spend_usd
+    if _classifier_spend_usd + predicted > daily_max:
+        raise ValueError(
+            f"Classifier daily spend guard reached "
+            f"(CLASSIFIER_MAX_USD/ANALYZE_MAX_USD={daily_max}). "
+            "Raise CLASSIFIER_MAX_USD in .env or wait until tomorrow. "
+            "This wallet is separate from ASK_MAX_USD (/ask)."
+        )
+
+    needs_approval = (
+        predicted > _CLASSIFIER_APPROVAL_PREDICTED_USD
+        or remaining < _CLASSIFIER_APPROVAL_REMAINING_USD
+    )
+    approved = spend_approved or _env_spend_approved()
+    if needs_approval and not approved:
+        raise ValueError(
+            "Classifier spend approval required "
+            f"(predicted ${predicted:.4f} or daily remaining ${remaining:.4f} < "
+            f"${_CLASSIFIER_APPROVAL_REMAINING_USD:.2f}). "
+            "Set classifier_spend_approved=true on the request, check the Streamlit "
+            "approval box, or set CLASSIFIER_SPEND_APPROVED=1 in .env."
+        )
+
+    return max_tokens, predicted
+
+
+def classify_prompt_complexity(
+    prompt_text: str,
+    *,
+    spend_approved: bool = False,
+) -> dict[str, Any] | None:
     """LLM classifier for prompt complexity. Returns None if no API key."""
+    global _classifier_spend_usd
+
     if not _api_key_available():
         return None
 
@@ -111,6 +191,8 @@ def classify_prompt_complexity(prompt_text: str) -> dict[str, Any] | None:
     key = _cache_key(trimmed)
     if key in _classification_cache:
         return _classification_cache[key]
+
+    max_tokens, predicted = _assert_classifier_spend_allowed(trimmed, spend_approved=spend_approved)
 
     client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
     completion = client.chat.completions.create(
@@ -130,9 +212,19 @@ def classify_prompt_complexity(prompt_text: str) -> dict[str, Any] | None:
             },
             {"role": "user", "content": trimmed},
         ],
-        max_tokens=300,
+        max_tokens=max_tokens,
         temperature=0,
     )
+
+    actual = _usage_usd(completion.usage, predicted)
+    if actual > _CLASSIFIER_PER_CALL_MAX_USD:
+        # Still record spend, but fail closed so callers do not treat as success quietly.
+        _classifier_spend_usd += actual
+        raise ValueError(
+            f"Classifier per-call actual spend exceeded "
+            f"(${actual:.4f} > ${_CLASSIFIER_PER_CALL_MAX_USD:.2f})."
+        )
+    _classifier_spend_usd += actual
 
     raw = completion.choices[0].message.content or "{}"
     try:

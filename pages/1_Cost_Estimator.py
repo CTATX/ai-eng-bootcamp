@@ -38,8 +38,19 @@ with st.sidebar:
     use_llm_classifier = st.checkbox(
         "Use AI classifier (uses API credits)",
         value=False,
-        help="Uses gpt-4o-mini to refine complexity scores when OPENAI_API_KEY is set.",
+        help="Uses gpt-4o-mini to refine complexity scores when OPENAI_API_KEY is set. Default OFF.",
     )
+    classifier_spend_approved = False
+    if use_llm_classifier:
+        classifier_cap = "$0.50"
+        classifier_spend_approved = st.checkbox(
+            f"I approve classifier spend up to {classifier_cap}/day",
+            value=False,
+            help=(
+                "Required when predicted cost > $0.05 or daily remaining < $0.10. "
+                "Separate wallet from /ask (CLASSIFIER_MAX_USD / ANALYZE_MAX_USD)."
+            ),
+        )
     with st.expander("Server command (Terminal 1)"):
         st.code("uvicorn server.main:app --reload", language="bash")
 
@@ -207,6 +218,7 @@ if analyze_clicked:
                     "tasks_per_day": int(tasks_per_day),
                     "apply_headroom": apply_headroom,
                     "use_llm_classifier": use_llm_classifier,
+                    "classifier_spend_approved": classifier_spend_approved,
                 },
                 timeout=60,
             )

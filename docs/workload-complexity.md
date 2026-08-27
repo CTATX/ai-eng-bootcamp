@@ -71,9 +71,11 @@ Toggle `apply_headroom: true` on `/analyze` to forecast with an estimated input-
 
 ## Optional LLM classifier (Phase 2)
 
-Set `use_llm_classifier: true` on `/analyze` (or toggle in Streamlit sidebar). Requires `OPENAI_API_KEY` in `.env`.
+Set `use_llm_classifier: true` on `/analyze` (or toggle in Streamlit sidebar). Requires `OPENAI_API_KEY` in `.env`. Default **OFF**.
 
-- Caps input at 4,000 characters
+- Caps input at 4,000 characters; `CLASSIFIER_MAX_TOKENS` ≤ 300; per-call ≤ `$0.02`
+- Separate daily wallet: `CLASSIFIER_MAX_USD` / `ANALYZE_MAX_USD` (default `$0.50`) — not shared with `ASK_MAX_USD`
+- Approval when predicted > `$0.05` or remaining < `$0.10`: `classifier_spend_approved`, Streamlit checkbox, or `CLASSIFIER_SPEND_APPROVED=1`
 - Returns structured JSON dimensions + step hints
 - Merges with heuristics: LLM used when confidence ≥ 0.5; pure LLM when ≥ 0.85
 - Session-level cache avoids repeat charges for identical prompts

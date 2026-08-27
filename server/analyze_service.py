@@ -20,7 +20,10 @@ from server.schemas import (
 def run_analyze(body: AnalyzeRequest) -> AnalyzeResponse:
     llm_payload = None
     if body.use_llm_classifier:
-        llm_payload = classify_prompt_complexity(body.prompt_text)
+        llm_payload = classify_prompt_complexity(
+            body.prompt_text,
+            spend_approved=body.classifier_spend_approved,
+        )
 
     forecast = forecast_workload(
         body.prompt_text,
